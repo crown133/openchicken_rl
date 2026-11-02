@@ -1,0 +1,9 @@
+{
+  "name": "v12",
+  "sha256": "d435f6b2720e09a28c4579d43522889d86d9c94bc2f33887608db4078dcc67b4",
+  "size": 948007,
+  "fps": 50,
+  "duration_s": 10,
+  "source_workspace_path": "artifacts/microduck-v12-collision-fix-20261101/final/aligned/motion.npz",
+  "description": "Collision-aligned V12 reference"
+}

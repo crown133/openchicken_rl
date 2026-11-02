@@ -1,0 +1,14 @@
+{
+  "repository": "https://github.com/pollen-robotics/microduck_rl",
+  "commit": "bae39f5900b318f7e87fc485c30a31213cfa14eb",
+  "world_model_reference": "https://github.com/Breezewrf/supermimic_mjlab/tree/a7cee74636a4c596cd8710f8c2e51f82d78bb150",
+  "changes": [
+    "V12 preparation and collision alignment",
+    "Supertracking world model and BPTT policy/critic",
+    "BAM command transport and backlash state",
+    "Domain randomization and sensor model",
+    "GPU/CPU Replay storage option"
+  ],
+  "upstream_code_license": "Apache-2.0",
+  "upstream_mesh_license": "CC-BY-NC-SA-4.0"
+}
