@@ -28,7 +28,7 @@ What changed vs the 2026-07 design (kept below, still valid):
     its final stage (WARM_START) — re-running them from stage 0 would re-teach
     the walk under easier conditions and drift it. Only velstand's own phases
     ramp, and they are ~2× shorter than the from-scratch schedule.
-    LAUNCH:  MICRODUCK_WARM_START=1 uv run train Mjlab-VelStand-Flat-MicroDuck \
+    LAUNCH:  MICRODUCK_WARM_START=1 uv run train Mjlab-VelStand-Flat-OpenChicken \
                --env.scene.num-envs 4096 --agent.resume True \
                --wandb-run-path pollen-robotics/mjlab_microduck/441tzs6d \
                --wandb-checkpoint-name model_3750.pt
@@ -69,7 +69,7 @@ What changed vs the 2026-07 design (kept below, still valid):
     robot ~100% of the time in the CPU baseline), so falls are frequent
     on-policy data rather than rare accidents.
   - Backlash twin: robot_allcollisions_backlash.xml (add_backlash.py, 2° total)
-    → Mjlab-VelStand-*-Backlash-MicroDuck mirror the base model as required.
+    → Mjlab-VelStand-*-Backlash-OpenChicken mirror the base model as required.
   - NOT modelled on purpose (user decision 2026-09-09): the daemon limp. If the
     policy finds a gentler strategy with full authority, better let it.
 

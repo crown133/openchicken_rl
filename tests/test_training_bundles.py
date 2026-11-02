@@ -51,10 +51,10 @@ def test_hook_leaves_hf_jobs_submissions_alone(monkeypatch):
 
 
 def test_parse_train_args_finds_the_parent():
-    a = tr.parse_train_args(["Mjlab-VelStand-Rough-Backlash-MicroDuck", "--agent.resume", "True",
+    a = tr.parse_train_args(["Mjlab-VelStand-Rough-Backlash-OpenChicken", "--agent.resume", "True",
                              "--wandb-run-path", "pollen-robotics/mjlab_microduck/qz5g3bwi",
                              "--wandb-checkpoint-name", "model_1750.pt"])
-    assert a["task_id"] == "Mjlab-VelStand-Rough-Backlash-MicroDuck"
+    assert a["task_id"] == "Mjlab-VelStand-Rough-Backlash-OpenChicken"
     assert a["loaded_from"] == {"wandb_run": "pollen-robotics/mjlab_microduck/qz5g3bwi", "checkpoint": 1750}
     assert tr.parse_train_args(["T", "--agent.max-iterations=10"])["loaded_from"] is None
     assert tr.parse_train_args(["T", "--init-checkpoint", "hf://a/b/c"])["loaded_from"] == {"spec": "hf://a/b/c"}
@@ -98,7 +98,7 @@ def test_onnx_weight_verification(tmp_path):
 
 
 def test_cards_carry_the_commands():
-    meta = {"id": "velstand/abc_10", "task_id": "Mjlab-VelStand-Rough-Backlash-MicroDuck", "experiment_name": "velstand",
+    meta = {"id": "velstand/abc_10", "task_id": "Mjlab-VelStand-Rough-Backlash-OpenChicken", "experiment_name": "velstand",
             "checkpoint_file": "model_10.pt", "code": {"commit": "deadbeef", "on_remote": True, "uncommitted_diff": None},
             "source": {}, "loaded_from": None, "teachers": {}, "onnx": [], "command": ["uv", "run", "train", "X"]}
     readme = tr.render_bundle_readme(meta, "o/microduck-training")

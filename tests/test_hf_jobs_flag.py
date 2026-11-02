@@ -34,7 +34,7 @@ import pytest
 from mjlab_microduck import train_hook
 
 _ROOT = Path(__file__).resolve().parents[1]
-_TASK = "Mjlab-Velocity-Flat-MicroDuck"
+_TASK = "Mjlab-Velocity-Flat-OpenChicken"
 
 
 def _our_scripts():

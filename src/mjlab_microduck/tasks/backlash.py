@@ -1,7 +1,7 @@
 """Backlash task variants — swap in the backlash robot model + encoder obs.
 
 ``make_backlash_variant(cfg)`` turns any microduck env cfg into its backlash
-counterpart (task ids ``Mjlab-<Task>-<Flat|Rough>-Backlash-MicroDuck``):
+counterpart (task ids ``Mjlab-<Task>-<Flat|Rough>-Backlash-OpenChicken``):
 
 1. Robot → the matching backlash robot cfg (an unactuated
    ``passive_<joint>_backlash`` hinge in series with each of the 14 servo

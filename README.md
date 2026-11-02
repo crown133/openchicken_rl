@@ -34,13 +34,13 @@ uv sync --frozen
 source env.sh
 
 # train the walking policy (uses your GPU; ~1-2 h for a usable gait at 4096 envs)
-uv run train Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 4096
+uv run train Mjlab-Velocity-Flat-OpenChicken --env.scene.num-envs 4096
 
 # watch a trained policy in the viewer
-uv run play Mjlab-Velocity-Flat-MicroDuck --wandb-run-path <entity/project/run_id>
+uv run play Mjlab-Velocity-Flat-OpenChicken --wandb-run-path <entity/project/run_id>
 
 # export to ONNX for deployment
-uv run scripts/export.py Mjlab-Velocity-Flat-MicroDuck --wandb-run-path <...>
+uv run scripts/export.py Mjlab-Velocity-Flat-OpenChicken --wandb-run-path <...>
 uv run publish --onnx output.onnx --repo <user>/microduck-<name> --kind episodic --duration-s 4.0   # share it (see "Publishing a policy")
 
 # drive the exported policy in CPU MuJoCo with the keyboard
@@ -50,7 +50,7 @@ uv run scripts/infer_policy.py --walking output.onnx
 New runs start from scratch by default. Resume only when explicitly intended:
 
 ```bash
-uv run train Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 4096 \
+uv run train Mjlab-Velocity-Flat-OpenChicken --env.scene.num-envs 4096 \
     --agent.run-name resume --agent.load-checkpoint model_29999.pt --agent.resume True
 ```
 
@@ -58,6 +58,11 @@ No GPU? Add `--hf-jobs` to any train command to run it on Hugging Face Jobs
 instead of locally (see [scripts/hf/README.md](scripts/hf/README.md)).
 
 ## Tasks
+
+All task IDs in this fork use `OpenChicken`. For commands referencing an older
+run, replace `MicroDuck` with `OpenChicken` in the task ID; old IDs are no longer
+registered. This rename does not change task configurations or checkpoint
+formats. The internal Python package remains `mjlab_microduck`.
 
 `uv run list-envs` prints the live registry. Flat/Rough variants exist where noted.
 
@@ -67,20 +72,20 @@ instead of locally (see [scripts/hf/README.md](scripts/hf/README.md)).
 
 | Task id | Terrain | Description |
 |---|---|---|
-| `Mjlab-Velocity-{Flat,Rough}-MicroDuck` | flat/rough | **The main task**: walking with velocity commands + head-pose commands |
-| `Mjlab-VelStand-{Flat,Rough}-MicroDuck` | flat/rough | Walking + fall recovery in one policy |
-| `Mjlab-StandUp-{Flat,Rough}-MicroDuck` | flat/rough | Stand up from face-down/face-up/sitting, then hold the stand + body-pose control |
-| `Mjlab-SitStand-{Flat,Rough}-MicroDuck` | flat/rough | Commanded sit ↔ stand in one policy, gently, head commandable |
-| `Mjlab-GroundPick-{Flat,Rough}-MicroDuck` | flat/rough | Crouch and touch the ground with the mouth tip, return to stand |
-| `Mjlab-BallKick-Flat-MicroDuck` | flat | Kick a 70 mm / 15 g ball forward (actor is ball-blind) |
-| `Mjlab-Roulade-Flat-MicroDuck` | flat | Forward roll over the head, land back on the feet |
-| `Mjlab-Velocity-Flat-MicroDuck-Rollers` | flat | Roller-skate velocity tracking (passive wheels under the feet) |
-| `Mjlab-Velocity-Swizzle-MicroDuck` | flat | Classic symmetric swizzle skating |
-| `Mjlab-RollerCrouch-Flat-MicroDuck` | flat | Crouch while gliding on rollers |
-| `Mjlab-RollerSlope-Flat-MicroDuck` | slope | Glide down slopes on rollers |
-| `Mjlab-RollerStandUp-Flat-MicroDuck` | flat | Stand up from the ground onto the wheels |
-| `Mjlab-Spin-Flat-MicroDuck` | flat | Fast spin in place on rollers |
-| `Mjlab-Supertracking-Flat-MicroDuck` | flat | SuperMimic-style V12 motion tracking; use the dedicated trainer below |
+| `Mjlab-Velocity-{Flat,Rough}-OpenChicken` | flat/rough | **The main task**: walking with velocity commands + head-pose commands |
+| `Mjlab-VelStand-{Flat,Rough}-OpenChicken` | flat/rough | Walking + fall recovery in one policy |
+| `Mjlab-StandUp-{Flat,Rough}-OpenChicken` | flat/rough | Stand up from face-down/face-up/sitting, then hold the stand + body-pose control |
+| `Mjlab-SitStand-{Flat,Rough}-OpenChicken` | flat/rough | Commanded sit ↔ stand in one policy, gently, head commandable |
+| `Mjlab-GroundPick-{Flat,Rough}-OpenChicken` | flat/rough | Crouch and touch the ground with the mouth tip, return to stand |
+| `Mjlab-BallKick-Flat-OpenChicken` | flat | Kick a 70 mm / 15 g ball forward (actor is ball-blind) |
+| `Mjlab-Roulade-Flat-OpenChicken` | flat | Forward roll over the head, land back on the feet |
+| `Mjlab-Velocity-Flat-OpenChicken-Rollers` | flat | Roller-skate velocity tracking (passive wheels under the feet) |
+| `Mjlab-Velocity-Swizzle-OpenChicken` | flat | Classic symmetric swizzle skating |
+| `Mjlab-RollerCrouch-Flat-OpenChicken` | flat | Crouch while gliding on rollers |
+| `Mjlab-RollerSlope-Flat-OpenChicken` | slope | Glide down slopes on rollers |
+| `Mjlab-RollerStandUp-Flat-OpenChicken` | flat | Stand up from the ground onto the wheels |
+| `Mjlab-Spin-Flat-OpenChicken` | flat | Fast spin in place on rollers |
+| `Mjlab-Supertracking-Flat-OpenChicken` | flat | SuperMimic-style V12 motion tracking; use the dedicated trainer below |
 
 At deployment the runtime hot-swaps these native PPO policies (walk / recover / trick)
 behind a shared 61-dimensional observation contract, so any of them can take
@@ -102,7 +107,7 @@ training DR ranges to one value, `--no-bam` falls back to the XML PD actuators.
 
 Every main task has a **Backlash** twin that trains on a model with ±1° of gear
 play (2° total) in series with each of the 14 servo joints: insert `-Backlash`
-before `MicroDuck` in the task id, e.g. `Mjlab-Velocity-Flat-Backlash-MicroDuck`.
+before `OpenChicken` in the task id, e.g. `Mjlab-Velocity-Flat-Backlash-OpenChicken`.
 
 The backlash is modeled properly for sim2real: each servo gets an unactuated
 `passive_<joint>_backlash` hinge, and because the real encoder sits on the
@@ -307,10 +312,10 @@ with one command, no daemon release needed.
 
 ```bash
 # From a wandb run — exports through the one safe path, then uploads
-uv run publish --task Mjlab-PoliteBow-Flat-MicroDuck \
+uv run publish --task Mjlab-StandUp-Flat-OpenChicken \
     --wandb-run-path <entity/project/run_id> --checkpoint 3000 \
-    --repo <user>/microduck-polite-bow --kind episodic --duration-s 4.0 \
-    --description "Bows from a two-foot stand and comes back up."
+    --repo <user>/openchicken-standup --kind episodic --duration-s 6.0 \
+    --description "Stands up from the ground and holds the standing pose."
 
 # From an ONNX you already exported (validated, not re-exported)
 uv run publish --onnx output.onnx --repo <user>/microduck-flamingo \

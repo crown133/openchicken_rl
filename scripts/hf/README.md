@@ -16,7 +16,7 @@ wandb login      # auto-detected from ~/.netrc and forwarded
 Your normal train command, plus `--hf-jobs`:
 
 ```fish
-uv run train Mjlab-Kick-Flat-MicroDuck \
+uv run train Mjlab-BallKick-Flat-OpenChicken \
     --env.scene.num-envs 4096 --agent.max_iterations 4000 --hf-jobs
 ```
 

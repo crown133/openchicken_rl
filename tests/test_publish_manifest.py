@@ -41,7 +41,7 @@ FLAMINGO = {
         "idle": [0, 0, 0],
     },
     "robot": {"model": "microduck", "hw_rev": 1, "servos": "xl330", "control_hz": 50},
-    "training": {"task_id": "Mjlab-FlamingoCycleHard-Flat-MicroDuck"},
+    "training": {"task_id": "Mjlab-FlamingoCycleHard-Flat-OpenChicken"},
 }
 
 # The official set, as uploaded 2026-09-02 (schema 2).
@@ -139,7 +139,7 @@ def test_absence_is_not_evidence():
 def test_an_episodic_manifest_is_a_loadable_skill():
     built = m.build_manifest(
         name="polite-bow", kind="episodic", description="Bows.", duration_s=4.0,
-        training={"task_id": "Mjlab-PoliteBow-Flat-MicroDuck", "commit": "abc"},
+        training={"task_id": "Mjlab-PoliteBow-Flat-OpenChicken", "commit": "abc"},
     )
     m.validate_manifest(built)
     assert built["schema_version"] == 2

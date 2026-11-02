@@ -116,7 +116,7 @@ def test_task_is_registered():
 
     import mjlab_microduck.tasks  # noqa: F401  (l'import déclenche l'enregistrement)
 
-    assert "Mjlab-RollerStandUp-Flat-MicroDuck" in list_tasks()
+    assert "Mjlab-RollerStandUp-Flat-OpenChicken" in list_tasks()
 
 
 def test_joint_indices_match_actual_roller_model():

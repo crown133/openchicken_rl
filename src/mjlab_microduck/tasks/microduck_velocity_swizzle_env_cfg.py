@@ -3,7 +3,7 @@
 A separate roller task producing a CLASSIC SWIZZLE: both blades stay on the ground,
 the legs spread out and pull back in SYMMETRICALLY (hourglass pattern), propelling
 the duck forward. Simpler / more stable alternative to the alternating stride
-(`Mjlab-Velocity-Flat-MicroDuck-Rollers`), which does not transfer well to the real
+(`Mjlab-Velocity-Flat-OpenChicken-Rollers`), which does not transfer well to the real
 robot. The stride env is left untouched.
 
 Approach A (see docs/superpowers/specs/2026-07-23-swizzle-env-design.md): the base
