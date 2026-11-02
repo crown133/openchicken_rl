@@ -28,6 +28,7 @@ artifacts/
 !/motion/assets/**/*.npz
 !/motion/assets/**/*.mp4
 !/assets/hardware/openchicken-demo.mp4
+!/assets/hardware/openchicken-demo.gif
 
 # Local caches, credentials and interrupted writes
 .pytest_cache/

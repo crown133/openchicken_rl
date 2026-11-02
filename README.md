@@ -2,16 +2,22 @@
 
 Based on [Pollen Robotics Microduck RL](https://github.com/pollen-robotics/microduck_rl) at `bae39f5900b318f7e87fc485c30a31213cfa14eb`. This fork retains the native tasks and adds SuperMimic-style motion tracking for OpenChicken. See [UPSTREAM_SOURCE.json](UPSTREAM_SOURCE.json) for provenance.
 
-<img width="480" alt="OpenChicken robot" src="assets/hardware/openchicken.jpg" />
-
+<table>
+  <tr>
+    <td align="center" width="50%"><img height="270" alt="OpenChicken robot" src="assets/hardware/openchicken.jpg" /></td>
+    <td align="center" width="50%"><a href="assets/hardware/openchicken-demo.mp4"><img height="270" alt="OpenChicken hardware video preview" src="assets/hardware/openchicken-demo.gif" /></a></td>
+  </tr>
+  <tr>
+    <td align="center">OpenChicken</td>
+    <td align="center"><a href="assets/hardware/openchicken-demo.mp4">Watch the original video (8.2 s)</a></td>
+  </tr>
+</table>
 
 RL training environments for [Microduck](https://github.com/pollen-robotics/microduck) —
 a ~800 g, ~25 cm tall bipedal robot — built on
 [mjlab](https://github.com/mujocolab/mjlab) (MuJoCo Warp) with PPO for the native tasks. The added Supertracking task uses a learned world model and differentiable policy optimization.
 Policies are trained here at 50 Hz, exported to ONNX, and deployed on the real
 robot by the runtime in [pollen-robotics/microduck](https://github.com/pollen-robotics/microduck).
-
-[Watch the OpenChicken hardware video (8.2 s)](assets/hardware/openchicken-demo.mp4)
 
 The repo encodes the full sim2real recipe: [BAM](https://github.com/Rhoban/bam)
 actuator physics, domain randomization, backlash simulation, and the
