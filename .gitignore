@@ -27,6 +27,7 @@ artifacts/
 # Versioned reference motions and previews (not training outputs)
 !/motion/assets/**/*.npz
 !/motion/assets/**/*.mp4
+!/assets/hardware/openchicken-demo.mp4
 
 # Local caches, credentials and interrupted writes
 .pytest_cache/
