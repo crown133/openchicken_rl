@@ -1,9 +1,0 @@
-{
-  "name": "v12_stand_transitions",
-  "sha256": "fd439533055c22c9b8b032b883a60bdc0521efd8466ffefc46a702db0cda9374",
-  "size": 1139334,
-  "fps": 50,
-  "duration_s": 12,
-  "source_workspace_path": "artifacts/microduck-native-settings-and-v12-transitions-20261101/reference_with_transitions/aligned/motion.npz",
-  "description": "1s stand-to-V12 + unchanged 10s V12 + 1s return-to-stand"
-}

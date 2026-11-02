@@ -1,0 +1,26 @@
+{
+  "name": "v12",
+  "sha256": "d435f6b2720e09a28c4579d43522889d86d9c94bc2f33887608db4078dcc67b4",
+  "size": 948007,
+  "fps": 50,
+  "duration_s": 10,
+  "source_workspace_path": "artifacts/microduck-v12-collision-fix-20261101/final/aligned/motion.npz",
+  "description": "Collision-aligned V12 reference",
+  "assets": {
+    "style_reference_50hz.npz": {
+      "sha256": "b76e012b8639ed26dfbfdff787f7bc194130a0fed646b37d694dbeed02a72213",
+      "size": 69141,
+      "source_workspace_path": "artifacts/microduck-v12-collision-fix-20261101/final/style_reference_50hz.npz"
+    },
+    "cycle_150hz.npz": {
+      "sha256": "632fc6f985ea410b0ba6b767c5b989c8416f76da5608fdc28352f14b62e10138",
+      "size": 40227,
+      "source_workspace_path": "artifacts/microduck-v12-collision-fix-20261101/final/cycle_150hz.npz"
+    },
+    "collision_fixed_preview.mp4": {
+      "sha256": "bc5dc5297a02d337515f4b2c72e89bd6610b5fc1354a729057a146bdb1420b3c",
+      "size": 813910,
+      "source_workspace_path": "artifacts/microduck-v12-collision-fix-20261101/final/collision_fixed_preview.mp4"
+    }
+  }
+}

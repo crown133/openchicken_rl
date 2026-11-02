@@ -1,0 +1,26 @@
+{
+  "name": "v12_stand_transitions",
+  "sha256": "fd439533055c22c9b8b032b883a60bdc0521efd8466ffefc46a702db0cda9374",
+  "size": 1139334,
+  "fps": 50,
+  "duration_s": 12,
+  "source_workspace_path": "artifacts/microduck-native-settings-and-v12-transitions-20261101/reference_with_transitions/aligned/motion.npz",
+  "description": "1s stand-to-V12 + unchanged 10s V12 + 1s return-to-stand",
+  "assets": {
+    "style_reference_50hz.npz": {
+      "sha256": "b0d53d52d737fff0676ced7f323366bdba208f9fd60400776bcf9ad191de221a",
+      "size": 92193,
+      "source_workspace_path": "artifacts/microduck-native-settings-and-v12-transitions-20261101/reference_with_transitions/style_reference_50hz.npz"
+    },
+    "stand_v12_stand_front_rear.mp4": {
+      "sha256": "dfd97c78a128a85aec359714865a3a4d1536fe651d6403ab87e5561c7ead1d13",
+      "size": 2667617,
+      "source_workspace_path": "artifacts/microduck-native-settings-and-v12-transitions-20261101/reference_with_transitions/stand_v12_stand_front_rear.mp4"
+    },
+    "transition_keyframes.jpg": {
+      "sha256": "08a331b69697bee36a625350c4193e5a83093ac6fcb8161f6f5f88f90f7f94fb",
+      "size": 170269,
+      "source_workspace_path": "artifacts/microduck-native-settings-and-v12-transitions-20261101/reference_with_transitions/transition_keyframes.jpg"
+    }
+  }
+}

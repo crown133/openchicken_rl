@@ -1,0 +1,38 @@
+{
+  "name": "v12_original",
+  "fps": 50,
+  "duration_s": 10,
+  "description": "Accepted V12 kinematic style before collision repair; not the training reference",
+  "assets": {
+    "style_reference_50hz.npz": {
+      "sha256": "085c0d4e1af0b8d6cfec0e80fb741b72a85f7a7ad1230150579e16065235a119",
+      "size": 68314,
+      "source_workspace_path": "artifacts/microduck-in-out-head-v12-20261101/style_reference_50hz.npz"
+    },
+    "cycle_diagnostics_150hz.npz": {
+      "sha256": "8682567e6e3ea7e603d834ea9e533cd15a2ae2eb09391e8ba6e0dac6974ea463",
+      "size": 56216,
+      "source_workspace_path": "artifacts/microduck-in-out-head-v12-20261101/cycle_diagnostics_150hz.npz"
+    },
+    "preview.mp4": {
+      "sha256": "9749c59d85448ca69c4509b9f79321496418d51e35005dbfd899e0633d8ee76b",
+      "size": 1966620,
+      "source_workspace_path": "artifacts/microduck-in-out-head-v12-20261101/preview.mp4"
+    },
+    "rear_preview.mp4": {
+      "sha256": "44d78a48d665213bcb2b054dbbe4f2fc4bcd57f2070ccc9ac486f90b85c93533",
+      "size": 1741855,
+      "source_workspace_path": "artifacts/microduck-in-out-head-v12-20261101/rear_preview.mp4"
+    },
+    "storyboard.jpg": {
+      "sha256": "1a0865a8375bfbb9d0094ea75d3070a593e8e7112ead98d5ecca3f643463be98",
+      "size": 141787,
+      "source_workspace_path": "artifacts/microduck-in-out-head-v12-20261101/storyboard.jpg"
+    },
+    "rear_storyboard.jpg": {
+      "sha256": "7bd67d5b9b180f57c2809a3127667c789d6ecefccc838b0f003db506375cc56c",
+      "size": 135463,
+      "source_workspace_path": "artifacts/microduck-in-out-head-v12-20261101/rear_storyboard.jpg"
+    }
+  }
+}

@@ -8,7 +8,7 @@ from mjlab_microduck.robot.microduck_constants import MICRODUCK_STANDUP_ROBOT_CF
 from .microduck_velocity_env_cfg import make_microduck_velocity_env_cfg
 from .backlash import make_backlash_variant
 
-_MOTIONS = Path(__file__).resolve().parents[3] / "motions"
+_MOTIONS = Path(__file__).resolve().parents[3] / "motion/assets"
 DEFAULT_MOTION = str(_MOTIONS / "v12/motion.npz")
 ROBUST_MOTION = str(_MOTIONS / "v12_stand_transitions/motion.npz")
 

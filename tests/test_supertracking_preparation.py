@@ -14,7 +14,7 @@ def test_bundled_reference_paths_and_hashes():
     root = Path(__file__).resolve().parents[1]
     for name in (DEFAULT_MOTION, ROBUST_MOTION):
         path = Path(name)
-        assert path.is_relative_to(root / 'motions')
+        assert path.is_relative_to(root / 'motion/assets')
         manifest = json.loads(path.with_name('manifest.json').read_text())
         assert hashlib.sha256(path.read_bytes()).hexdigest() == manifest['sha256']
 
