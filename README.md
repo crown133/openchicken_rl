@@ -223,6 +223,39 @@ with HOME-relative joint targets in radians. It needs its own runtime integratio
 and is not interchangeable with native 61D policies or the native publishing
 validator below. Training does not launch or control a real robot.
 
+To embed the motion reference from a verified checkpoint export bundle:
+
+```bash
+source env.sh
+python scripts/embed_supertracking_motion.py \
+    --export-dir artifacts/supertracking_best_27900 \
+    --output-dir artifacts/supertracking_best_27900_embedded
+```
+
+The source bundle contains the ONNX, `motion_latents_50hz.npz`,
+`policy_interface.json` and `export_validation.json` recording their hashes and
+checkpoint consistency. The converter verifies those hashes, preserves the
+decoder/normalizer, and embeds the matching latent table as an ONNX initializer.
+It checks every reference frame and loop/reset boundaries against the original
+ONNX. No retraining or checkpoint/Replay restoration is involved.
+
+The resulting file takes `history: float32[batch,10,48]` and
+`time_step: int64[batch,1]`, and returns `action: float32[batch,14]`.
+It needs no external reference file. `time_step` is a **frame index, not seconds**:
+start at zero and increment after each inference at 50 Hz. The graph uses
+`max(time_step, 0) % reference_frames` (600 frames / 12 seconds for robust V12).
+It has no internal clock; repeating a frame index does not advance playback.
+Stopping after one cycle or restarting is the caller's responsibility.
+
+History remains external, ordered oldest to newest with the current observation
+last. Initialize all ten rows from the first valid 48D observation, with the
+previous-action block zero (HOME-relative), and refill history on a fresh start.
+After each action, the next observation includes that previous action. Supply
+un-normalized observations; the ONNX includes normalization. Resetting a buffer
+does not put the robot into the trained entry posture. Joint ordering, HOME,
+control frequency and reset details are recorded in the new `policy_interface.json`.
+Native 61D policies and the original latent-input exports retain their interfaces.
+
 Explicit BAM transport uses checkpoint schema `bam_substeps_v1`; earlier world
 models and Replay buffers cannot be resumed under this schema. New training runs
 start with fresh models, optimizers, normalizers and Replay.
