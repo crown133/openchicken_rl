@@ -3,20 +3,21 @@ from copy import deepcopy
 import numpy as np
 import mujoco
 import torch
+import pytest
 from mjlab.entity import Entity
-from mjlab_microduck.robot.microduck_constants import MICRODUCK_STANDUP_ROBOT_CFG
-from mjlab_microduck.tasks.microduck_supertracking_env_cfg import make_microduck_supertracking_env_cfg
-from mjlab_microduck.tasks import mdp
-from mjlab_microduck.supertracking.models import Kinematics, Actor, WorldModel, Critic, goal_features
-from mjlab_microduck.supertracking.runner import Replay, frozen
-from mjlab_microduck.supertracking.delay import delayed_targets
+from mjlab_openchicken.robot.openchicken_constants import OPENCHICKEN_ALLCOLLISIONS_ROBOT_CFG
+from mjlab_openchicken.tasks.openchicken_supertracking_env_cfg import make_openchicken_supertracking_env_cfg
+from mjlab_openchicken.tasks import mdp
+from mjlab_openchicken.supertracking.models import Kinematics, Actor, WorldModel, Critic, goal_features
+from mjlab_openchicken.supertracking.runner import Replay, frozen
+from mjlab_openchicken.supertracking.delay import delayed_targets
 
 
 def fixture():
-    entity = Entity(deepcopy(MICRODUCK_STANDUP_ROBOT_CFG))
+    entity = Entity(deepcopy(OPENCHICKEN_ALLCOLLISIONS_ROBOT_CFG))
     model = entity.spec.compile()
-    bodies = [model.body(n).id for n in entity.body_names]
-    joints = [model.joint(n).id for n in entity.joint_names]
+    bodies = [model.body(n).id for n in entity.body_names if n not in ("comb", "lower_beak")]
+    joints = [model.joint(n).id for n in entity.joint_names if not n.startswith("passive_")]
     return model, bodies, joints
 
 
@@ -25,10 +26,10 @@ def test_differentiable_kinematics_matches_mujoco_and_has_gradients():
     kinematics = Kinematics(model, bodies, joints)
     poses = np.tile(model.qpos0, (5, 1))
     rng = np.random.default_rng(42)
-    poses[:, 7:] = rng.uniform(model.jnt_range[joints, 0], model.jnt_range[joints, 1], (5, 14))
+    poses[:, model.jnt_qposadr[joints]] = rng.uniform(model.jnt_range[joints, 0], model.jnt_range[joints, 1], (5, 14))
     poses[:, 3:7] = rng.normal(size=(5, 4))
     poses[:, 3:7] /= np.linalg.norm(poses[:, 3:7], axis=-1, keepdims=True)
-    state = torch.tensor(np.c_[poses, np.zeros((5, 62))], dtype=torch.float32, requires_grad=True)
+    state = torch.tensor(np.c_[poses[:, :7], poses[:, model.jnt_qposadr[joints]], np.zeros((5, 62))], dtype=torch.float32, requires_grad=True)
     pos, quat = kinematics(state)
     data = mujoco.MjData(model)
     for i, pose in enumerate(poses):
@@ -87,14 +88,14 @@ def test_reward_gradients_reach_actor_through_frozen_world():
 
 
 def test_config_retains_bam_collisions_and_original_actor_layout():
-    cfg = make_microduck_supertracking_env_cfg()
+    cfg = make_openchicken_supertracking_env_cfg()
     assert 'expand_bam_friction_fields' in cfg.events
     actuator = cfg.scene.entities['robot'].articulation.actuators[0]
     assert (actuator.delay_min_lag, actuator.delay_max_lag) == (3, 6)
     assert cfg.auto_reset is False
     assert list(cfg.observations['actor'].terms) == list(
-        __import__('mjlab_microduck.tasks.microduck_velocity_env_cfg', fromlist=['make_microduck_velocity_env_cfg'])
-        .make_microduck_velocity_env_cfg().observations['actor'].terms)
+        __import__('mjlab_openchicken.tasks.openchicken_velocity_env_cfg', fromlist=['make_openchicken_velocity_env_cfg'])
+        .make_openchicken_velocity_env_cfg().observations['actor'].terms)
     assert not cfg.rewards and not cfg.terminations
 
 
@@ -114,8 +115,8 @@ def test_failure_and_reward_are_consistent_at_reference():
 
 
 def test_backlash_encoder_fk_matches_physical_links():
-    from mjlab_microduck.robot.microduck_constants import MICRODUCK_BACKLASH_ROBOT_CFG
-    entity = Entity(deepcopy(MICRODUCK_BACKLASH_ROBOT_CFG))
+    from mjlab_openchicken.robot.openchicken_constants import OPENCHICKEN_ALLCOLLISIONS_BACKLASH_ROBOT_CFG
+    entity = Entity(deepcopy(OPENCHICKEN_ALLCOLLISIONS_BACKLASH_ROBOT_CFG))
     model = entity.spec.compile()
     data = mujoco.MjData(model)
     nominal, bodies, joints = fixture()
@@ -174,17 +175,34 @@ def test_robust_world_keeps_context_and_models_passive_motion():
 
 
 def test_robust_config_uses_correct_dr_scopes_without_polluting_nominal():
-    cfg = make_microduck_supertracking_env_cfg(robust=True)
+    cfg = make_openchicken_supertracking_env_cfg(robust=True)
     assert cfg.episode_length_s == 12
     assert cfg.scene.entities['robot'].articulation.actuators[0].vin_range == (6.5, 8.2)
     assert {'foot_friction', 'encoder_bias', 'randomize_com', 'randomize_head_com',
             'randomize_mass_inertia', 'randomize_joint_friction', 'randomize_armature',
             'expand_bam_friction_fields'} <= cfg.events.keys()
     assert 'push_robot' not in cfg.events
-    push_test = make_microduck_supertracking_env_cfg(robust=True, push_test=True)
+    push_test = make_openchicken_supertracking_env_cfg(robust=True, push_test=True)
     assert push_test.events['push_robot'].params['velocity_range'] == {'x': (-.30, .30), 'y': (-.30, .30)}
     assert 'bearing_roll' not in cfg.events['randomize_head_com'].params['asset_cfg'].body_names
     assert cfg.events['randomize_armature'].params['asset_cfg'].joint_names == (r'^(?!passive_).*',)
-    nominal = make_microduck_supertracking_env_cfg()
+    nominal = make_openchicken_supertracking_env_cfg()
     assert nominal.scene.entities['robot'].articulation.actuators[0].vin_range == (7.4, 7.4)
     assert 'push_robot' not in nominal.events
+
+
+@pytest.mark.parametrize("robust", [False, True])
+@pytest.mark.parametrize("play", [False, True])
+def test_supertracking_uses_full_collision_model_with_independent_beak(robust, play):
+    cfg = make_openchicken_supertracking_env_cfg(robust=robust, play=play)
+    robot = Entity(deepcopy(cfg.scene.entities["robot"]))
+    model = robot.spec.compile()
+    active = np.flatnonzero((model.geom_contype != 0) | (model.geom_conaffinity != 0))
+    collision_bodies = {model.body(int(model.geom_bodyid[i])).name for i in active}
+    assert len(active) == 42
+    assert {"upper_leg_left", "upper_leg_right", "lower_beak"} <= collision_bodies
+    assert not {"comb", "neck", "neck_pitch"} & collision_bodies
+    assert sum(n.endswith("_backlash") for n in robot.joint_names) == (14 if robust else 0)
+    _, policy_names = robot.find_joints_by_actuator_names(cfg.actions["joint_pos"].actuator_names)
+    assert len(policy_names) == 14 and "passive_beak" not in policy_names
+    assert robot.actuators[1].target_names == ["passive_beak"]

@@ -7,10 +7,10 @@ import pytest
 import torch
 from onnx import helper, numpy_helper
 
-from mjlab_microduck import checkpoints, train_hook
-from mjlab_microduck.publish import manifest as m
-from mjlab_microduck.publish import training as tr
-from mjlab_microduck.tasks import distill
+from mjlab_openchicken import checkpoints, train_hook
+from mjlab_openchicken.publish import manifest as m
+from mjlab_openchicken.publish import training as tr
+from mjlab_openchicken.tasks import distill
 
 
 def test_parse_hf_specs():
@@ -101,21 +101,21 @@ def test_cards_carry_the_commands():
     meta = {"id": "velstand/abc_10", "task_id": "Mjlab-VelStand-Rough-Backlash-OpenChicken", "experiment_name": "velstand",
             "checkpoint_file": "model_10.pt", "code": {"commit": "deadbeef", "on_remote": True, "uncommitted_diff": None},
             "source": {}, "loaded_from": None, "teachers": {}, "onnx": [], "command": ["uv", "run", "train", "X"]}
-    readme = tr.render_bundle_readme(meta, "o/microduck-training")
-    assert "--init-checkpoint hf://o/microduck-training/bundles/velstand/abc_10" in readme
-    assert "MICRODUCK_WARM_START=1" in readme and "git checkout deadbeef" in readme
-    assert "bundles/velstand/abc_10" in tr.render_index([meta], "o/microduck-training")
+    readme = tr.render_bundle_readme(meta, "o/openchicken-training")
+    assert "--init-checkpoint hf://o/openchicken-training/bundles/velstand/abc_10" in readme
+    assert "OPENCHICKEN_WARM_START=1" in readme and "git checkout deadbeef" in readme
+    assert "bundles/velstand/abc_10" in tr.render_index([meta], "o/openchicken-training")
 
 
 def test_policy_readme_points_to_the_bundle():
     man = m.build_manifest(name="x", kind="episodic", description="d", duration_s=1.0,
                            training={"task_id": "T", "repo": "pollen-robotics/microduck_rl", "bundle": "hf://o/microduck-training/bundles/e/r_1"})
     m.validate_manifest(man)
-    assert "--init-checkpoint hf://o/microduck-training/bundles/e/r_1" in m.render_readme(man, "o/microduck-x", None)
+    assert "--init-checkpoint hf://o/microduck-training/bundles/e/r_1" in m.render_readme(man, "o/openchicken-x", None)
 
 
 def test_share_training_is_opt_in():
-    from mjlab_microduck.publish.cli import PublishConfig
+    from mjlab_openchicken.publish.cli import PublishConfig
 
     assert PublishConfig(repo="o/r", kind="episodic").share_training is False
     assert tr.ShareConfig().public is False  # bundle repos are created private

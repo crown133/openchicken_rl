@@ -1,4 +1,4 @@
-"""`uv run publish` writes what the microduck daemon loads — schema 2, checked before upload.
+"""`uv run publish` writes what the openchicken daemon loads — schema 2, checked before upload.
 
 The daemon (`pollen-robotics/microduck`) refuses a policy whose manifest disagrees with its
 `duck_ipc_proto` constants, refuses at load a graph that is not 61 -> 14, and turns only a
@@ -17,11 +17,11 @@ import onnx
 import pytest
 from onnx import TensorProto, helper, numpy_helper
 
-from mjlab_microduck.publish import manifest as m
+from mjlab_openchicken.publish import manifest as m
 
 _ROOT = Path(__file__).resolve().parents[1]
 
-# `RemiFabre/microduck-flamingo-cycle`'s manifest as published — the community convention this
+# `RemiFabre/openchicken-flamingo-cycle`'s manifest as published — the community convention this
 # schema had to stay compatible with, verbatim except for trimmed prose.
 FLAMINGO = {
     "schema_version": 2,
@@ -40,7 +40,7 @@ FLAMINGO = {
         "body": "unused (zeros)",
         "idle": [0, 0, 0],
     },
-    "robot": {"model": "microduck", "hw_rev": 1, "servos": "xl330", "control_hz": 50},
+    "robot": {"model": "openchicken", "hw_rev": 1, "servos": "xl330", "control_hz": 50},
     "training": {"task_id": "Mjlab-FlamingoCycleHard-Flat-OpenChicken"},
 }
 
@@ -50,7 +50,7 @@ OFFICIAL_SET = {
     "model_api": 1,
     "obs_len": 61,
     "action_len": 14,
-    "robot": {"model": "microduck", "hw_rev": 1, "servos": "xl330", "control_hz": 50},
+    "robot": {"model": "openchicken", "hw_rev": 1, "servos": "xl330", "control_hz": 50},
     "policies": [
         {"file": "alpha_walking.onnx", "kind": "perpetual"},
         {"file": "alpha_sitstand.onnx", "name": "sitstand", "kind": "scripted",
@@ -84,17 +84,17 @@ def _tiny_policy(path: Path, obs_len: int = m.OBS_LEN, action_len: int = m.ACTIO
 
 
 def test_constants_are_the_daemons():
-    """`duck_ipc_proto`: POLICY_OBS_LEN 61, POLICY_ACTION_LEN 14, ROBOT_MODEL microduck. A drift
+    """`duck_ipc_proto`: POLICY_OBS_LEN 61, POLICY_ACTION_LEN 14, ROBOT_MODEL openchicken. A drift
     here is a refusal on every robot, before the download."""
     assert (m.OBS_LEN, m.ACTION_LEN) == (61, 14)
-    assert m.ROBOT["model"] == "microduck"
+    assert m.ROBOT["model"] == "openchicken"
     assert m.MODEL_API == 1
     assert m.SCHEMA_VERSION == 2
 
 
 def test_publish_is_a_declared_script():
     scripts = tomllib.loads((_ROOT / "pyproject.toml").read_text())["project"]["scripts"]
-    assert scripts["publish"] == "mjlab_microduck.publish.cli:main"
+    assert scripts["publish"] == "mjlab_openchicken.publish.cli:main"
 
 
 # -- both shapes validate ----------------------------------------------------------------------
@@ -193,49 +193,49 @@ def test_a_gait_is_perpetual_with_nothing_to_unwind():
     gait = m.build_manifest(name="my-walk", kind="perpetual", description="Walks.", slot="walk")
     m.validate_manifest(gait)
     assert gait["duration_s"] is None and "unwind_s" not in gait and gait["slot"] == "walk"
-    assert m.install_commands(gait, "u/microduck-my-walk") == "sudo robotctl policy load walk u/microduck-my-walk"
+    assert m.install_commands(gait, "u/openchicken-my-walk") == "sudo robotctl policy load walk u/openchicken-my-walk"
     no_slot = m.build_manifest(name="g", kind="perpetual", description="d")
     assert "policy load <slot>" in m.install_commands(no_slot, "u/g")
 
 
 def test_the_readme_tells_the_owner_how_to_run_it():
     ep = m.build_manifest(name="bow", kind="episodic", description="Bows.", duration_s=4.0, chain=True)
-    text = m.render_readme(ep, "someone/microduck-bow")
-    assert "robotctl policy add bow someone/microduck-bow" in text
+    text = m.render_readme(ep, "someone/openchicken-bow")
+    assert "robotctl policy add bow someone/openchicken-bow" in text
     assert "robot do bow" in text and "chains" in text
     pp = m.build_manifest(name="flamingo", kind="perpetual", description="d", unwind_s=1.5)
-    assert "--hold <seconds>" in m.render_readme(pp, "someone/microduck-flamingo")
+    assert "--hold <seconds>" in m.render_readme(pp, "someone/openchicken-flamingo")
 
 
 def test_the_readme_puts_the_repo_under_the_robotics_pipeline():
     ep = m.build_manifest(name="bow", kind="episodic", description="Bows.", duration_s=4.0)
-    front = m.render_readme(ep, "someone/microduck-bow").split("---")[1]
+    front = m.render_readme(ep, "someone/openchicken-bow").split("---")[1]
     assert "pipeline_tag: robotics" in front.splitlines()
     assert "base_model" not in front, "an original policy declares no parent"
 
 
 def test_a_gait_tags_its_slot_for_the_hub_snippet():
     gait = m.build_manifest(name="my-walk", kind="perpetual", description="d", slot="walk")
-    front = m.render_readme(gait, "u/microduck-my-walk").split("---")[1].splitlines()
-    assert "- microduck-slot:walk" in front
+    front = m.render_readme(gait, "u/openchicken-my-walk").split("---")[1].splitlines()
+    assert "- openchicken-slot:walk" in front
     no_slot = m.build_manifest(name="bow", kind="episodic", description="d", duration_s=4.0)
-    assert "microduck-slot" not in m.render_readme(no_slot, "u/microduck-bow")
+    assert "openchicken-slot" not in m.render_readme(no_slot, "u/openchicken-bow")
 
 
 def test_a_remix_declares_its_base_model():
     ep = m.build_manifest(name="bow", kind="episodic", description="Bows.", duration_s=4.0)
-    text = m.render_readme(ep, "someone/microduck-deep-bow", base_model="pollen/microduck-bow")
+    text = m.render_readme(ep, "someone/openchicken-deep-bow", base_model="pollen/openchicken-bow")
     front = text.split("---")[1].splitlines()
-    assert "base_model: pollen/microduck-bow" in front
+    assert "base_model: pollen/openchicken-bow" in front
     assert "base_model_relation: finetune" in front
-    assert "https://huggingface.co/pollen/microduck-bow" in text
+    assert "https://huggingface.co/pollen/openchicken-bow" in text
 
 
-@pytest.mark.parametrize("base", ["microduck-bow", "a/b/c", "", "someone/microduck-bow"])
+@pytest.mark.parametrize("base", ["openchicken-bow", "a/b/c", "", "someone/openchicken-bow"])
 def test_a_bad_base_model_is_refused(base):
     ep = m.build_manifest(name="bow", kind="episodic", description="Bows.", duration_s=4.0)
     with pytest.raises(m.ManifestError, match="base_model"):
-        m.render_readme(ep, "someone/microduck-bow", base_model=base)
+        m.render_readme(ep, "someone/openchicken-bow", base_model=base)
 
 
 # -- the ONNX gate ------------------------------------------------------------------------------
@@ -279,12 +279,12 @@ def test_a_constant_network_fails_the_smoke_run(tmp_path):
 
 def test_the_cli_dry_run_writes_a_repo(tmp_path, monkeypatch):
     """End to end without the Hub or a GPU: an ONNX in, the three repo files out."""
-    from mjlab_microduck.publish.cli import PublishConfig, run
+    from mjlab_openchicken.publish.cli import PublishConfig, run
 
     policy = _tiny_policy(tmp_path / "out.onnx")
     monkeypatch.chdir(tmp_path)
     code = run(PublishConfig(
-        repo="someone/microduck-bow", kind="episodic", onnx=str(policy),
+        repo="someone/openchicken-bow", kind="episodic", onnx=str(policy),
         duration_s=4.0, description="Bows.", dry_run=True,
     ))
     assert code == 0
@@ -294,19 +294,19 @@ def test_the_cli_dry_run_writes_a_repo(tmp_path, monkeypatch):
     assert manifest["name"] == "bow" and manifest["kind"] == "episodic"
     assert manifest["training"]["source_file"] == "out.onnx"
     assert "commit" in manifest["training"], "git provenance is filled from the checkout"
-    assert "robotctl policy add bow someone/microduck-bow" in (out / "README.md").read_text()
+    assert "robotctl policy add bow someone/openchicken-bow" in (out / "README.md").read_text()
 
 
 def test_the_cli_ships_a_video_as_replay_mp4_and_nowhere_else(tmp_path, monkeypatch):
     """The Hub's replay widget finds `replay.mp4` by name; the manifest and README stay silent."""
-    from mjlab_microduck.publish.cli import PublishConfig, run
+    from mjlab_openchicken.publish.cli import PublishConfig, run
 
     policy = _tiny_policy(tmp_path / "out.onnx")
     clip = tmp_path / "bow_take3.mp4"
     clip.write_bytes(b"not really an mp4")
     monkeypatch.chdir(tmp_path)
     code = run(PublishConfig(
-        repo="someone/microduck-bow", kind="episodic", onnx=str(policy),
+        repo="someone/openchicken-bow", kind="episodic", onnx=str(policy),
         duration_s=4.0, description="Bows.", video=str(clip), dry_run=True,
     ))
     assert code == 0
@@ -317,11 +317,11 @@ def test_the_cli_ships_a_video_as_replay_mp4_and_nowhere_else(tmp_path, monkeypa
 
 
 def test_the_cli_refuses_a_missing_video(tmp_path):
-    from mjlab_microduck.publish.cli import PublishConfig, run
+    from mjlab_openchicken.publish.cli import PublishConfig, run
 
     policy = _tiny_policy(tmp_path / "out.onnx")
     with pytest.raises(SystemExit):
         run(PublishConfig(
-            repo="someone/microduck-bow", kind="episodic", onnx=str(policy),
+            repo="someone/openchicken-bow", kind="episodic", onnx=str(policy),
             duration_s=4.0, video=str(tmp_path / "nope.mp4"), dry_run=True,
         ))

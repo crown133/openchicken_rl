@@ -1,15 +1,15 @@
 from mjlab.tasks.velocity import mdp
-from mjlab_microduck.tasks.microduck_velocity_swizzle_env_cfg import (
-    make_microduck_velocity_swizzle_env_cfg,
+from mjlab_openchicken.tasks.openchicken_velocity_swizzle_env_cfg import (
+    make_openchicken_velocity_swizzle_env_cfg,
 )
-from mjlab_microduck.tasks.microduck_velocity_rollers_env_cfg import (
-    make_microduck_velocity_rollers_env_cfg,
+from mjlab_openchicken.tasks.openchicken_velocity_rollers_env_cfg import (
+    make_openchicken_velocity_rollers_env_cfg,
 )
 
 
 def test_swizzle_head_control_wired():
-    cfg = make_microduck_velocity_swizzle_env_cfg()
-    roller_cfg = make_microduck_velocity_rollers_env_cfg()
+    cfg = make_openchicken_velocity_swizzle_env_cfg()
+    roller_cfg = make_openchicken_velocity_rollers_env_cfg()
 
     # Head-pose command term exists.
     assert "head_pose" in cfg.commands

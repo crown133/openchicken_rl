@@ -3,9 +3,9 @@ requires = ["uv_build>=0.8.19,<0.9.0"]
 build-backend = "uv_build"
 
 [project]
-name = "mjlab-microduck"
+name = "mjlab-openchicken"
 version = "0.1.0"
-description = "RL training environments for the Microduck robot, built on mjlab"
+description = "RL training environments for the OpenChicken robot, built on mjlab"
 readme = "README.md"
 license = "Apache-2.0 AND CC-BY-NC-SA-4.0"
 license-files = ["LICENSE", "LICENSE-MODELS.md"]
@@ -24,7 +24,7 @@ dependencies = [
     "matplotlib>=3.10.9",
     # mjlab 1.3.0 imports scipy (terrains/heightfield_terrains.py) but forgets
     # to declare it — without this line a fresh `uv sync` (e.g. on HF jobs)
-    # can't even `import mjlab_microduck` (found 2026-07-21).
+    # can't even `import mjlab_openchicken` (found 2026-07-21).
     "scipy>=1.16",
     # Direct dep ONLY so [tool.uv.sources] can bind torch to the CUDA index on
     # aarch64 (see the torch source below) — uv applies sources to DIRECT
@@ -38,7 +38,7 @@ dependencies = [
 ]
 
 [project.entry-points."mjlab.tasks"]
-mjlab_microduck = "mjlab_microduck.tasks"
+mjlab_openchicken = "mjlab_openchicken.tasks"
 
 [project.scripts]
 # This name collides with mjlab's `train` ON PURPOSE and must stay declared.
@@ -50,11 +50,11 @@ mjlab_microduck = "mjlab_microduck.tasks"
 # The collision is harmless because the two shims are interchangeable:
 # --hf-jobs is intercepted from the `mjlab.tasks` entry point above
 # (train_hook.py), not here. Locked by tests/test_hf_jobs_flag.py.
-train = "mjlab_microduck.train_cli:main"
+train = "mjlab_openchicken.train_cli:main"
 # Serve a simulated body to the real `robotd` — see sim/body_server.py.
-duck-body = "mjlab_microduck.sim.body_server:main"
-publish = "mjlab_microduck.publish.cli:main"
-share-training = "mjlab_microduck.publish.training:main"
+duck-body = "mjlab_openchicken.sim.body_server:main"
+publish = "mjlab_openchicken.publish.cli:main"
+share-training = "mjlab_openchicken.publish.training:main"
 [tool.ruff]
 src = ["src"]  # Helpful for recognizing first-party imports.
 indent-width = 4

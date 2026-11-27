@@ -1,4 +1,4 @@
-"""Map an offline Microduck reference to the training MJCF; never drive hardware."""
+"""Map an offline OpenChicken reference to the training MJCF; never drive hardware."""
 import argparse
 import hashlib
 import json
@@ -9,9 +9,9 @@ import numpy as np
 from scipy.spatial import ConvexHull
 
 from mjlab.entity import Entity
-from mjlab_microduck.robot.microduck_constants import (
-    MICRODUCK_GROUNDCONTACT_XML,
-    MICRODUCK_STANDUP_ROBOT_CFG,
+from mjlab_openchicken.robot.openchicken_constants import (
+    OPENCHICKEN_ALLCOLLISIONS_XML,
+    OPENCHICKEN_ALLCOLLISIONS_ROBOT_CFG,
 )
 
 
@@ -20,12 +20,14 @@ def sha256(path):
 
 
 def training_model():
-    robot = Entity(MICRODUCK_STANDUP_ROBOT_CFG)
+    robot = Entity(OPENCHICKEN_ALLCOLLISIONS_ROBOT_CFG)
     robot.spec.worldbody.add_geom(
         name="audit_floor", type=mujoco.mjtGeom.mjGEOM_PLANE,
         size=[2, 2, .01], contype=1, conaffinity=1,
     )
-    return robot.spec.compile(), tuple(robot.joint_names), tuple(robot.body_names)
+    joints = tuple(n for n in robot.joint_names if not n.startswith("passive_"))
+    bodies = tuple(n for n in robot.body_names if n not in ("comb", "lower_beak"))
+    return robot.spec.compile(), joints, bodies
 
 
 def geom_vertices(model, data, geom):
@@ -130,12 +132,12 @@ def prepare(source, preview_xml, output):
                         quaternion_order=np.array("wxyz"), joint_names=np.array(joints), body_names=np.array(bodies),
                         joint_pos=poses[:, qadr], joint_vel=velocity[:, vadr],
                         root_pos=poses[:, :3], root_quat_wxyz=poses[:, 3:7],
-                        qpos=poses, qvel=velocity, loop_duration_s=np.array(float(time[-1])))
+                        qpos=np.c_[poses[:, :7], poses[:, qadr]], qvel=np.c_[velocity[:, :6], velocity[:, vadr]], loop_duration_s=np.array(float(time[-1])))
     nonfoot = [c for c in contacts if c["kind"] != "foot_ground"]
     margin = np.minimum(poses[:, qadr] - model.jnt_range[joint_ids, 0], model.jnt_range[joint_ids, 1] - poses[:, qadr])
     metrics = {
         "source": str(source.resolve()), "source_sha256": sha256(source),
-        "training_xml": str(MICRODUCK_GROUNDCONTACT_XML), "training_xml_sha256": sha256(MICRODUCK_GROUNDCONTACT_XML),
+        "training_xml": str(OPENCHICKEN_ALLCOLLISIONS_XML), "training_xml_sha256": sha256(OPENCHICKEN_ALLCOLLISIONS_XML),
         "preview_xml_sha256": sha256(preview_xml), "joint_names": joints, "body_names": bodies,
         "joint_mapping": "identity by name; no sign flips; body frames recomputed from training MJCF",
         "joint_axis_max_vector_error": float(np.max(axis_error)),
@@ -158,7 +160,7 @@ def prepare(source, preview_xml, output):
     (output / "alignment.json").write_text(json.dumps(metrics, indent=2) + "\n")
     (output / "manifest.json").write_text(json.dumps({
         "schema_version": 1, "fps": 1 / dt, "quaternion_order": "wxyz",
-        "clips": [{"name": "microduck_side_lean_v12", "file": "motion.npz", "frames": len(time)}],
+        "clips": [{"name": "openchicken_side_lean_v12", "file": "motion.npz", "frames": len(time)}],
         "source_sha256": sha256(source), "motion_sha256": sha256(output / "motion.npz"),
         "validation": "pending_physics" if metrics["collision_pass"] else "failed_collision",
     }, indent=2) + "\n")

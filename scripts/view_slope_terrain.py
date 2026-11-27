@@ -22,7 +22,7 @@ import mujoco
 import mujoco.viewer
 
 from mjlab.terrains.terrain_generator import TerrainGenerator, TerrainGeneratorCfg
-from mjlab_microduck.tasks.slope_terrain import (
+from mjlab_openchicken.tasks.slope_terrain import (
     FlatRampTerrainCfg,
     RAMP_DEG_MIN,
     RAMP_DEG_MAX,

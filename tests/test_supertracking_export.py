@@ -6,8 +6,8 @@ import onnxruntime as ort
 import pytest
 import torch
 
-from mjlab_microduck.supertracking.export import embed_motion_reference, validate_embedded_reference
-from mjlab_microduck.supertracking.models import Actor, ExportedActor
+from mjlab_openchicken.supertracking.export import embed_motion_reference, validate_embedded_reference
+from mjlab_openchicken.supertracking.models import Actor, ExportedActor
 
 
 @pytest.fixture

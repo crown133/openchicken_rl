@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="openchicken_head">
+  <!-- Head-only description synchronized with robot_allcollisions.xml. See ../README.md. -->
+  <mujoco>
+    <compiler meshdir="../meshes/mjcf" strippath="true" discardvisual="false" fusestatic="false" inertiafromgeom="false" />
+  </mujoco>
+  <link name="yaw_roll_motion">
+    <inertial>
+      <origin xyz="-0.000166657 -0.00500964 0.0178065" rpy="0 0 0" />
+      <mass value="0.0486" />
+      <inertia ixx="6.97903e-06" iyy="8.10293e-06" izz="9.57884e-06" ixy="3.21657e-07" ixz="-3.4797e-08" iyz="3.4295e-07" />
+    </inertial>
+    <visual name="yaw_roll_motion_visual_0">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_yaw_roll_motion.stl" />
+      </geometry>
+      <material name="openchicken_charcoal">
+        <color rgba="0.160784 0.176471 0.180392 1" />
+      </material>
+    </visual>
+    <collision name="yaw_roll_motion_collision_1">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_yaw_roll_motion.stl" />
+      </geometry>
+    </collision>
+    <visual name="yaw_roll_motion_visual_2">
+      <origin xyz="0 0 0.0145" rpy="-1.570796326794897 -1.570796326794897 0" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/xl330.stl" />
+      </geometry>
+      <material name="xl330_material">
+        <color rgba="0.160784 0.176471 0.180392 1" />
+      </material>
+    </visual>
+    <collision name="yaw_roll_motion_collision_3">
+      <origin xyz="0 0 0.0145" rpy="-1.570796326794897 -1.570796326794897 0" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/xl330.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="bottom_head">
+    <inertial>
+      <origin xyz="0.0121897305041 0.0002353799925263 -0.02308671781452" rpy="0 0 0" />
+      <mass value="0.198" />
+      <inertia ixx="0.0003158555864626" iyy="0.000257664339532" izz="0.0002238925028343" ixy="-4.482497160319e-06" ixz="1.950791112109e-05" iyz="8.571497562487e-06" />
+    </inertial>
+    <visual name="bottom_head_visual_0">
+      <origin xyz="0 0 -0.0035" rpy="-1.909408785596978e-10 -3.74525508384238e-08 0.01019632679482782" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_bottom_head.stl" />
+      </geometry>
+      <material name="openchicken_terracotta">
+        <color rgba="0.850980 0.415686 0.196078 1" />
+      </material>
+    </visual>
+    <collision name="bottom_head_collision">
+      <origin xyz="0 0 -0.0035" rpy="-1.909408785596978e-10 -3.74525508384238e-08 0.01019632679482782" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_bottom_head.stl" />
+      </geometry>
+    </collision>
+    <visual name="bottom_head_visual_2">
+      <origin xyz="-5.430619871111e-10 -2.768642732105e-12 0.011" rpy="-1.560600000000106 -1.570796289341897 0" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/xl330.stl" />
+      </geometry>
+      <material name="xl330_material">
+        <color rgba="0.160784 0.176471 0.180392 1" />
+      </material>
+    </visual>
+    <collision name="bottom_head_collision_3">
+      <origin xyz="-5.430619871111e-10 -2.768642732105e-12 0.011" rpy="-1.560600000000106 -1.570796289341897 0" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/xl330.stl" />
+      </geometry>
+    </collision>
+    <visual name="bottom_head_visual_4">
+      <origin xyz="0 0 -0.0035" rpy="-1.909408785596978e-10 -3.74525508384238e-08 0.01019632679482782" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_upper_shell.stl" />
+      </geometry>
+      <material name="openchicken_warm_white">
+        <color rgba="0.945098 0.937255 0.909804 1" />
+      </material>
+    </visual>
+    <visual name="bottom_head_visual_5">
+      <origin xyz="0 0 -0.0035" rpy="-1.909408785596978e-10 -3.74525508384238e-08 0.01019632679482782" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_upper_beak.stl" />
+      </geometry>
+      <material name="openchicken_beak_gold">
+        <color rgba="0.937255 0.768627 0.466667 1" />
+      </material>
+    </visual>
+    <visual name="bottom_head_visual_6">
+      <origin xyz="0 0 -0.0035" rpy="-1.909408785596978e-10 -3.74525508384238e-08 0.01019632679482782" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_eye_frame.stl" />
+      </geometry>
+      <material name="openchicken_charcoal">
+        <color rgba="0.160784 0.176471 0.180392 1" />
+      </material>
+    </visual>
+    <visual name="bottom_head_visual_7">
+      <origin xyz="0 0 -0.0035" rpy="-1.909408785596978e-10 -3.74525508384238e-08 0.01019632679482782" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_head_internals.stl" />
+      </geometry>
+      <material name="openchicken_charcoal">
+        <color rgba="0.160784 0.176471 0.180392 1" />
+      </material>
+    </visual>
+    <collision name="upper_head_collision">
+      <origin xyz="0 0 -0.0035" rpy="-1.909408785596978e-10 -3.74525508384238e-08 0.01019632679482782" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_upper_head.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="head_roll" type="revolute">
+    <origin xyz="-0.0179 0 0.0145" rpy="-0 -1.570796326794897 0" />
+    <parent link="yaw_roll_motion" />
+    <child link="bottom_head" />
+    <axis xyz="0 0 1" />
+    <!-- MJCF has no velocity limit; 1000000 is a URDF numeric placeholder, not a hardware speed rating. -->
+    <limit lower="-0.4363323129985913" upper="0.4363323129985735" effort="0.96" velocity="1000000" />
+    <dynamics damping="0.053" friction="0.0048" />
+  </joint>
+  <link name="comb">
+    <inertial>
+      <origin xyz="0.07390543148255 0.0001000942037456 -0.01447555403313" rpy="0 0 0" />
+      <mass value="0.001" />
+      <inertia ixx="4.782539032731e-07" iyy="5.631136441498e-07" izz="1.088370490447e-07" ixy="4.435495290036e-12" ixz="3.766515879603e-08" iyz="-1.424645659639e-12" />
+    </inertial>
+    <visual name="comb_visual_0">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_comb.stl" />
+      </geometry>
+      <material name="openchicken_vermillion">
+        <color rgba="0.850980 0.211765 0.168627 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="comb_fixed" type="fixed">
+    <origin xyz="0 0 -0.0035" rpy="-1.909408785596978e-10 -3.74525508384238e-08 0.01019632679482812" />
+    <parent link="bottom_head" />
+    <child link="comb" />
+  </joint>
+  <link name="lower_beak">
+    <inertial>
+      <origin xyz="0.013539 -0.0021817 0.016631" rpy="0 0 0" />
+      <mass value="0.0026251" />
+      <inertia ixx="1.3047e-07" iyy="2.2865e-07" izz="1.3779e-07" ixy="1.5086e-08" ixz="2.0656e-08" iyz="-5.734e-09" />
+    </inertial>
+    <visual name="lower_beak_visual_0">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_lower_beak.stl" />
+      </geometry>
+      <material name="openchicken_beak_gold">
+        <color rgba="0.937255 0.768627 0.466667 1" />
+      </material>
+    </visual>
+    <collision name="lower_beak_collision_1">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://20261025.SLDASM/meshes/mjcf/openchicken_lower_beak.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="passive_beak" type="revolute">
+    <origin xyz="-0.00116002563286 0.01568898774097 -0.05535000004045" rpy="-1.570740162452642 1.570792691042335 -3.13134383565775" />
+    <parent link="bottom_head" />
+    <child link="lower_beak" />
+    <axis xyz="0 0 -1" />
+    <!-- MJCF has no velocity limit; 1000000 is a URDF numeric placeholder, not a hardware speed rating. -->
+    <limit lower="0" upper="0.5235987755983" effort="0.08" velocity="1000000" />
+    <dynamics damping="0.0005" friction="0" />
+  </joint>
+</robot>

@@ -24,14 +24,14 @@ import onnx
 import torch
 from onnx import numpy_helper
 
-import mjlab_microduck.tasks  # noqa: F401  (registers tasks)
+import mjlab_openchicken.tasks  # noqa: F401  (registers tasks)
 from mjlab.envs import ManagerBasedRlEnv
-from mjlab_microduck.pickup.features import FEAT_DIM, PAUSED_IDX, CurrentSensorDR, paused_target_rel
-from mjlab_microduck.pickup.hand import VirtualHand, HandCfg, add_hand_to_spec
-from mjlab_microduck.robot.microduck_constants import MICRODUCK_ALLCOLLISIONS_BACKLASH_ROBOT_CFG
-from mjlab_microduck.tasks import mdp as m
-from mjlab_microduck.tasks.backlash import make_backlash_variant
-from mjlab_microduck.tasks.microduck_velstand_env_cfg import make_microduck_velstand_env_cfg
+from mjlab_openchicken.pickup.features import FEAT_DIM, PAUSED_IDX, CurrentSensorDR, paused_target_rel
+from mjlab_openchicken.pickup.hand import VirtualHand, HandCfg, add_hand_to_spec
+from mjlab_openchicken.robot.openchicken_constants import OPENCHICKEN_ALLCOLLISIONS_BACKLASH_ROBOT_CFG
+from mjlab_openchicken.tasks import mdp as m
+from mjlab_openchicken.tasks.backlash import make_backlash_variant
+from mjlab_openchicken.tasks.openchicken_velstand_env_cfg import make_openchicken_velstand_env_cfg
 
 PROD_POLICY = "logs/bench_onnx/velstand_fhathosb_3750.onnx"
 
@@ -66,8 +66,8 @@ class OnnxMLP(torch.nn.Module):
 
 
 def build_env(num_envs, device, seed, keep_held_tilted=False):
-    cfg = make_microduck_velstand_env_cfg(play=False, rough=True)
-    cfg = make_backlash_variant(cfg, MICRODUCK_ALLCOLLISIONS_BACKLASH_ROBOT_CFG)
+    cfg = make_openchicken_velstand_env_cfg(play=False, rough=True)
+    cfg = make_backlash_variant(cfg, OPENCHICKEN_ALLCOLLISIONS_BACKLASH_ROBOT_CFG)
     cfg.scene.num_envs = num_envs
     cfg.seed = seed
     # the terrain-level curriculum would move robots between levels on reset by
@@ -173,7 +173,7 @@ def main():
 
     det = sm = win = None
     if args.detector:
-        from mjlab_microduck.pickup.model import PickupNet, PauseStateMachine, StateMachineCfg
+        from mjlab_openchicken.pickup.model import PickupNet, PauseStateMachine, StateMachineCfg
         ck = torch.load(args.detector, map_location=dev)
         det = PickupNet(**ck.get("net_kwargs", {})).to(dev); det.load_state_dict(ck["state_dict"]); det.eval()
         smc = StateMachineCfg(**ck.get("sm_cfg", {}))

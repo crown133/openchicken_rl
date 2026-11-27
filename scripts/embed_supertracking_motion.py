@@ -5,7 +5,7 @@ from pathlib import Path
 
 import onnx
 
-from mjlab_microduck.supertracking.export import (
+from mjlab_openchicken.supertracking.export import (
     SCHEMA, embed_motion_reference, sha256, validate_embedded_reference,
 )
 

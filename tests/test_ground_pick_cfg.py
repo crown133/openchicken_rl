@@ -1,12 +1,12 @@
-from mjlab_microduck.tasks.microduck_ground_pick_env_cfg import (
-    make_microduck_ground_pick_env_cfg,
+from mjlab_openchicken.tasks.openchicken_ground_pick_env_cfg import (
+    make_openchicken_ground_pick_env_cfg,
 )
-from mjlab_microduck.tasks.mdp import GroundPickPhaseCommand
+from mjlab_openchicken.tasks.mdp import GroundPickPhaseCommand
 
 
 def test_ground_pick_cfg_task_space_rewards():
     """Objectif espace-tâche : bouche près du sol (sans toucher) + orientée."""
-    cfg = make_microduck_ground_pick_env_cfg()
+    cfg = make_openchicken_ground_pick_env_cfg()
     r = cfg.rewards
     # proximité bouche->sol (tire vers le bas)
     assert "mouth_ground_proximity" in r
@@ -32,7 +32,7 @@ def test_ground_pick_cfg_task_space_rewards():
 
 
 def test_ground_pick_mouth_payload_wired():
-    cfg = make_microduck_ground_pick_env_cfg()
+    cfg = make_openchicken_ground_pick_env_cfg()
     # hook d'application (poids 0) + event de tirage du payload
     assert "mouth_payload_force" in cfg.rewards
     assert cfg.rewards["mouth_payload_force"].weight == 0.0
@@ -42,16 +42,16 @@ def test_ground_pick_mouth_payload_wired():
 
 
 def test_ground_pick_cfg_command_is_phase():
-    cfg = make_microduck_ground_pick_env_cfg()
+    cfg = make_openchicken_ground_pick_env_cfg()
     cmd = cfg.commands["twist"]
     assert cmd.class_type is GroundPickPhaseCommand
 
 
 def test_ground_pick_rough_variant_builds():
-    cfg = make_microduck_ground_pick_env_cfg(rough=True)
+    cfg = make_openchicken_ground_pick_env_cfg(rough=True)
     assert "mouth_ground_proximity" in cfg.rewards
 
 
 def test_ground_pick_play_variant_builds():
-    cfg = make_microduck_ground_pick_env_cfg(play=True)
+    cfg = make_openchicken_ground_pick_env_cfg(play=True)
     assert "mouth_ground_proximity" in cfg.rewards

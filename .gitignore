@@ -39,8 +39,8 @@ artifacts/
 !.env.example
 *.tmp
 
-src/mjlab_microduck/robot/microduck.bak/*
-src/mjlab_microduck/robot/microduck_test/*
+src/mjlab_openchicken/robot/openchicken.bak/*
+src/mjlab_openchicken/robot/openchicken_test/*
 data/
 *.pt
 

@@ -2,7 +2,7 @@ import math
 
 import torch
 
-from mjlab_microduck.tasks import mdp
+from mjlab_openchicken.tasks import mdp
 
 # Enveloppe du spec : accel 0.5s / régime 1.6s / freinage 0.5s / repos 1.4s sur 4s.
 _ENV = dict(rate_max=6.0, accel_end=0.125, hold_end=0.525, brake_end=0.650)

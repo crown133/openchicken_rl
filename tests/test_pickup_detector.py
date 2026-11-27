@@ -6,11 +6,11 @@ import numpy as np
 import pytest
 import torch
 
-from mjlab_microduck.pickup.features import (
+from mjlab_openchicken.pickup.features import (
     CURRENT_SLICE, FEAT_DIM, FEATURE_NAMES, HOLD_RAMP_S, PAUSE_POSE_REL, PAUSED_IDX, CurrentSensorDR, paused_target_rel,
 )
-from mjlab_microduck.pickup.hand import CARRY, IDLE, LOWER, HandCfg, VirtualHand
-from mjlab_microduck.pickup.model import WINDOW, PauseStateMachine, PickupNet, StateMachineCfg, export_onnx
+from mjlab_openchicken.pickup.hand import CARRY, IDLE, LOWER, HandCfg, VirtualHand
+from mjlab_openchicken.pickup.model import WINDOW, PauseStateMachine, PickupNet, StateMachineCfg, export_onnx
 
 
 def test_feature_layout():

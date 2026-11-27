@@ -10,11 +10,11 @@ import onnxruntime as ort
 import torch
 
 # Initialize task registration before importing the task-dependent helpers.
-import mjlab_microduck.tasks  # noqa: F401
-from mjlab_microduck.supertracking.env import Motion
-from mjlab_microduck.supertracking.export import sha256
-from mjlab_microduck.supertracking.models import Actor
-from mjlab_microduck.supertracking.runner import SupertrackingRunner
+import mjlab_openchicken.tasks  # noqa: F401
+from mjlab_openchicken.supertracking.env import Motion
+from mjlab_openchicken.supertracking.export import sha256
+from mjlab_openchicken.supertracking.models import Actor
+from mjlab_openchicken.supertracking.runner import SupertrackingRunner
 
 
 @torch.no_grad()

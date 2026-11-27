@@ -3,7 +3,7 @@ the policies are trained against in warp (bam.mujoco.MujocoController on a
 motor-converted model). These tests lock the two halves together:
 
 * the script's hardcoded BAM constants mirror ``_BAM_ACTUATOR_KWARGS`` in
-  microduck_constants (not imported there to keep the script torch/warp-free);
+  openchicken_constants (not imported there to keep the script torch/warp-free);
 * the motor conversion matches what ``bam.mjlab.BamActuator.edit_spec`` does
   (torque motors, voltage-bounded forcerange, armature, zeroed XML friction,
   stiff friction constraint) and a step loop runs with a live friction budget.
@@ -31,7 +31,7 @@ def ip():
 
 def test_cpu_bam_constants_mirror_training_cfg(ip):
     from bam.mjlab import BamActuator
-    from mjlab_microduck.robot.microduck_constants import _BAM_ACTUATOR_KWARGS as k
+    from mjlab_openchicken.robot.openchicken_constants import _BAM_ACTUATOR_KWARGS as k
 
     assert ip.BAM_MOTOR_NAME == k["motor_name"]
     assert ip.BAM_MODEL == k["model"]
@@ -48,7 +48,7 @@ def test_cpu_bam_constants_mirror_training_cfg(ip):
 def bam_sim(ip):
     bam_model = ip.load_bam_model(ip.BAM_KP_FW, 7.4, ip.BAM_MAX_CURRENT)
     model, data, ctrl, names = ip.load_mujoco_with_bam(
-        str(REPO / ip.MICRODUCK_XML), bam_model, 0.005, 0.1, ip.BAM_VIN_MIN
+        str(REPO / ip.OPENCHICKEN_XML), bam_model, 0.005, 0.1, ip.BAM_VIN_MIN
     )
     return ip, bam_model, model, data, ctrl, names
 
@@ -56,17 +56,22 @@ def bam_sim(ip):
 def test_actuators_converted_like_warp(bam_sim):
     ip, bam_model, model, data, ctrl, names = bam_sim
     kt, R = bam_model.kt.value, bam_model.R.value
-    assert len(names) == 14 and model.nu == 14
+    assert len(names) == 14 and model.nu == 15
+    ids = ip.policy_actuator_ids(model)
+    beak = model.actuator("beak_open").id
+    assert beak not in ids
+    assert model.actuator_gainprm[beak, 0] == .16
+    assert model.actuator_biasprm[beak, 1] == -.16
     assert not any(n.startswith("passive_") for n in names)
     # Torque motors: ctrl is the BAM torque, no MuJoCo PD left over.
-    assert (model.actuator_gaintype == mujoco.mjtGain.mjGAIN_FIXED).all()
-    assert (model.actuator_biastype == mujoco.mjtBias.mjBIAS_NONE).all()
-    assert np.allclose(model.actuator_gainprm[:, 0], 1.0)
+    assert (model.actuator_gaintype[ids] == mujoco.mjtGain.mjGAIN_FIXED).all()
+    assert (model.actuator_biastype[ids] == mujoco.mjtBias.mjBIAS_NONE).all()
+    assert np.allclose(model.actuator_gainprm[ids, 0], 1.0)
     # (set_to_motor leaves the old PD biasprm bytes behind; inert under BIAS_NONE,
     # exactly as in warp's edit_spec.)
     assert (model.actuator_forcelimited == 1).all()
-    assert np.allclose(model.actuator_forcerange[:, 1], 7.4 * kt / R)
-    dofs = model.jnt_dofadr[model.actuator_trnid[:, 0]]
+    assert np.allclose(model.actuator_forcerange[ids, 1], 7.4 * kt / R)
+    dofs = model.jnt_dofadr[model.actuator_trnid[ids, 0]]
     assert np.allclose(model.dof_armature[dofs], bam_model.actuator.get_extra_inertia())
     assert np.allclose(model.dof_solref[dofs], ip.BAM_STIFF_SOLREF_FRICTION)
     assert np.allclose(model.dof_solimp[dofs], ip.BAM_STIFF_SOLIMP_FRICTION)
@@ -81,12 +86,13 @@ def test_bam_step_loop_runs_with_live_friction(bam_sim):
     mujoco.mj_resetData(model, data)
     data.qpos[qa + 2] = 0.125
     data.qpos[qa + 3 : qa + 7] = [1, 0, 0, 0]
-    jq = model.jnt_qposadr[model.actuator_trnid[:, 0]]
+    ids = ip.policy_actuator_ids(model)
+    jq = model.jnt_qposadr[model.actuator_trnid[ids, 0]]
     data.qpos[jq] = ip.DEFAULT_POSE
     ctrl.reset(data.qpos)
     ctrl.q_target[:] = ip.DEFAULT_POSE
     mujoco.mj_forward(model, data)
-    dofs = model.jnt_dofadr[model.actuator_trnid[:, 0]]
+    dofs = model.jnt_dofadr[model.actuator_trnid[ids, 0]]
     for _ in range(100):
         ctrl.update()
         mujoco.mj_step(model, data)

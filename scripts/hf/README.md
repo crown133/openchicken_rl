@@ -1,6 +1,6 @@
 # HF Jobs training
 
-Train mjlab-microduck on Hugging Face's managed GPUs. Auth is the cached HF
+Train mjlab-openchicken on Hugging Face's managed GPUs. Auth is the cached HF
 token (`hf auth login` or `HF_TOKEN`); everything goes through the
 `huggingface_hub` Python API — the standalone `hf` CLI is not required.
 
@@ -40,13 +40,13 @@ Useful flags:
 - `--no-wandb` — don't forward a wandb key
 
 (`uv run scripts/hf/train_hf.py <task> ...` still works — it's a shim to the
-same code, which lives in `src/mjlab_microduck/hf_jobs.py`.)
+same code, which lives in `src/mjlab_openchicken/hf_jobs.py`.)
 
 ## What happens under the hood
 
 1. `git ls-files` snapshots tracked + uncommitted files of the repo you run
    from (worktree-aware) → `src-<stamp>.tar.gz`.
-2. Tarball is uploaded to private dataset `<namespace>/mjlab-microduck-src`.
+2. Tarball is uploaded to private dataset `<namespace>/mjlab-openchicken-src`.
 3. Private model repo `<namespace>/<run-name>` is created for checkpoints.
 4. A private HF bucket `<namespace>/mjlab-uv-cache` is mounted at `/uv-cache`
    and used as `UV_CACHE_DIR` so wheel downloads persist across runs (first

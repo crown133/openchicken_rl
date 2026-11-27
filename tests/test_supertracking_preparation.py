@@ -10,7 +10,7 @@ import pytest
 
 
 def test_bundled_reference_paths_and_hashes():
-    from mjlab_microduck.tasks.microduck_supertracking_env_cfg import DEFAULT_MOTION, ROBUST_MOTION
+    from mjlab_openchicken.tasks.openchicken_supertracking_env_cfg import DEFAULT_MOTION, ROBUST_MOTION
     root = Path(__file__).resolve().parents[1]
     for name in (DEFAULT_MOTION, ROBUST_MOTION):
         path = Path(name)
@@ -89,6 +89,10 @@ def test_v12_downbeat_stance_repair_removes_battery_collision(preparation, monke
     ])
     model, names, _ = preparation.training_model()
     data = mujoco.MjData(model)
+    full_pose = model.qpos0.copy()
+    full_pose[:7] = pose[:7]
+    full_pose[[model.joint(n).qposadr[0] for n in names]] = pose[7:]
+    pose = full_pose
     data.qpos[:] = pose
     mujoco.mj_forward(model, data)
     assert min(c.dist for c in data.contact) < -.007

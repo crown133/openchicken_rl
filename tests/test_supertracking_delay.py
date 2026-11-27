@@ -5,8 +5,8 @@ import pytest
 import torch
 
 from mjlab.utils.buffers import DelayBuffer
-from mjlab_microduck.supertracking.delay import command_target, delayed_targets
-from mjlab_microduck.supertracking.models import WorldModel, Critic
+from mjlab_openchicken.supertracking.delay import command_target, delayed_targets
+from mjlab_openchicken.supertracking.models import WorldModel, Critic
 
 
 def test_all_lag_sequences_match_mjlab_including_empty_and_partial_history():
@@ -70,7 +70,7 @@ def test_critic_observes_pending_commands_but_not_future_lags():
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='Replay transfer requires CUDA')
 def test_cpu_replay_preserves_gpu_samples_and_episode_masks():
-    from mjlab_microduck.supertracking.runner import Replay
+    from mjlab_openchicken.supertracking.runner import Replay
 
     gpu, cpu = Replay(12, 16, 'cuda:0'), Replay(12, 16, 'cuda:0', 'cpu')
     for step in range(18):
@@ -93,10 +93,10 @@ def test_cpu_replay_preserves_gpu_samples_and_episode_masks():
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='MuJoCo Warp integration requires CUDA')
 def test_real_bam_targets_reset_isolation_and_autoregressive_reconstruction():
     from mjlab.envs import ManagerBasedRlEnv
-    from mjlab_microduck.tasks.microduck_supertracking_env_cfg import make_microduck_supertracking_env_cfg, ROBUST_MOTION
-    from mjlab_microduck.supertracking.env import SupertrackingEnv
+    from mjlab_openchicken.tasks.openchicken_supertracking_env_cfg import make_openchicken_supertracking_env_cfg, ROBUST_MOTION
+    from mjlab_openchicken.supertracking.env import SupertrackingEnv
 
-    cfg = make_microduck_supertracking_env_cfg(robust=True, push_test=True)
+    cfg = make_openchicken_supertracking_env_cfg(robust=True, push_test=True)
     cfg.scene.num_envs = 64
     env = ManagerBasedRlEnv(cfg, device='cuda:0')
     try:

@@ -1,13 +1,13 @@
-from mjlab_microduck.tasks.microduck_roller_crouch_env_cfg import (
-    make_microduck_roller_crouch_env_cfg,
+from mjlab_openchicken.tasks.openchicken_roller_crouch_env_cfg import (
+    make_openchicken_roller_crouch_env_cfg,
 )
-from mjlab_microduck.tasks import mdp as microduck_mdp
+from mjlab_openchicken.tasks import mdp as openchicken_mdp
 
 
 def test_cfg_uses_phase_command():
-    cfg = make_microduck_roller_crouch_env_cfg()
+    cfg = make_openchicken_roller_crouch_env_cfg()
     cmd = cfg.commands["twist"]
-    assert isinstance(cmd, microduck_mdp.GroundPickPhaseCommandCfg)
+    assert isinstance(cmd, openchicken_mdp.GroundPickPhaseCommandCfg)
     # period must match --ground-pick-period at deploy
     # (0.5s down + 2s low + 0.5s up + 2s standing = 5s)
     assert cmd.period == 5.0
@@ -16,7 +16,7 @@ def test_cfg_uses_phase_command():
 
 
 def test_cfg_has_crouch_and_forward_rewards():
-    cfg = make_microduck_roller_crouch_env_cfg()
+    cfg = make_openchicken_roller_crouch_env_cfg()
     # pose-based objective (standing<->crouch) + L1 bootstrap
     assert "crouch_glide_pose" in cfg.rewards
     assert "crouch_glide_pose_l1" in cfg.rewards
@@ -38,7 +38,7 @@ def test_entry_velocity_applied_safely_via_reset_base():
     # state), NOT via a mode="reset" push_by_setting_velocity event, which adds
     # to the current (possibly divergent) root velocity and blows the base
     # free-joint up to NaN. See the env cfg comment on ENTRY_VELOCITY_X.
-    cfg = make_microduck_roller_crouch_env_cfg()
+    cfg = make_openchicken_roller_crouch_env_cfg()
     # the buggy reset-push event must NOT exist
     assert "entry_velocity" not in cfg.events
     # forward entry velocity must be carried by reset_base, with a positive range

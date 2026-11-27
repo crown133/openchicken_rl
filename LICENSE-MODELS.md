@@ -11,8 +11,8 @@ The 3D model files listed below are licensed under the
 
 ## Files covered
 
-- `src/mjlab_microduck/robot/microduck/assets/*.stl`
-- `src/mjlab_microduck/robot/xl330_test_bench/assets/*.stl`
+- `src/mjlab_openchicken/robot/openchicken/assets/*.stl`
+- `src/mjlab_openchicken/robot/xl330_test_bench/assets/*.stl`
 
 Everything else in this repository, including the MJCF robot descriptions (`.xml`),
 the export configs (`config_mjcf_*.json`, `config.json`) and the Onshape part

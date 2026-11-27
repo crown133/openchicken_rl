@@ -1,6 +1,6 @@
 {
- "generated_by": "scripts/odom_anchor_points.py --rust /home/antoine/Pollen/microduck/odometry/src/anchors.rs",
- "scene": "src/mjlab_microduck/robot/microduck/scene.xml",
+ "generated_by": "scripts/odom_anchor_points.py --rust /home/antoine/Pollen/openchicken/odometry/src/anchors.rs",
+ "scene": "src/mjlab_openchicken/robot/openchicken/scenes/scene.xml",
  "units": "metres, foot-site frame",
  "sets": {
   "v15": {

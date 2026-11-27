@@ -10,23 +10,23 @@ import math
 
 import torch
 
-from mjlab_microduck.tasks import mdp as microduck_mdp
-from mjlab_microduck.tasks.microduck_sitstand_env_cfg import (
-    make_microduck_sitstand_env_cfg,
+from mjlab_openchicken.tasks import mdp as openchicken_mdp
+from mjlab_openchicken.tasks.openchicken_sitstand_env_cfg import (
+    make_openchicken_sitstand_env_cfg,
 )
 
 # ── cfg ───────────────────────────────────────────────────────────────────────
 
 
 def test_neck_strain_is_cost_with_negative_weight():
-    r = make_microduck_sitstand_env_cfg().rewards["neck_strain_leaned"]
+    r = make_openchicken_sitstand_env_cfg().rewards["neck_strain_leaned"]
     # neck_torque_when_tilted returns ≥ 0 (mjlab cost style) → weight must be < 0.
-    assert r.func is microduck_mdp.neck_torque_when_tilted
+    assert r.func is openchicken_mdp.neck_torque_when_tilted
     assert r.weight < 0
 
 
 def test_perturbation_events_start_disabled_and_ramp():
-    cfg = make_microduck_sitstand_env_cfg()
+    cfg = make_openchicken_sitstand_env_cfg()
     jerk, tip = cfg.events["seated_head_jerk"], cfg.events["seated_tip"]
     assert jerk.mode == "interval" and tip.mode == "interval"
     assert jerk.params["prob"] == 0.0
@@ -128,7 +128,7 @@ def test_neck_cost_only_when_seated_and_leaned_back():
     _lean(env, 2, 30.0, backward=False)   # seated, leaned fwd  → 0 (head-assist path)
     _lean(env, 3, 18.5)                   # mid tilt ramp       → partial
     _lean(env, 4, 30.0)                   # STANDING target     → 0
-    c = microduck_mdp.neck_torque_when_tilted(env)
+    c = openchicken_mdp.neck_torque_when_tilted(env)
     assert c[0] == 0.0 and c[2] == 0.0 and c[4] == 0.0
     assert torch.isclose(c[1], torch.tensor((0.15 / 0.1) ** 2))
     assert 0.0 < c[3] < c[1]
@@ -141,7 +141,7 @@ def test_neck_cost_only_when_seated_and_leaned_back():
 def test_tip_kick_pitches_backward_and_only_seated():
     env = _Env(4)
     env.seat([0, 1])
-    microduck_mdp.seated_backward_tip(
+    openchicken_mdp.seated_backward_tip(
         env, torch.arange(4), ang_vel_range=(3.0, 3.0), lateral_frac=0.0
     )
     vel, ids = env.scene._asset.written
@@ -154,7 +154,7 @@ def test_tip_kick_pitches_backward_and_only_seated():
 def test_tip_kick_disabled_at_zero_range():
     env = _Env(2)
     env.seat([0, 1])
-    microduck_mdp.seated_backward_tip(env, torch.arange(2), ang_vel_range=(0.0, 0.0))
+    openchicken_mdp.seated_backward_tip(env, torch.arange(2), ang_vel_range=(0.0, 0.0))
     assert env.scene._asset.written is None
 
 
@@ -167,7 +167,7 @@ def test_head_jerk_touches_only_seated_envs():
     head = env.command_manager.head._command
     head[:] = 0.5
     env.seat([0, 1, 2])
-    microduck_mdp.seated_head_command_jerk(env, torch.arange(6), prob=1.0, flip_frac=1.0)
+    openchicken_mdp.seated_head_command_jerk(env, torch.arange(6), prob=1.0, flip_frac=1.0)
     assert torch.allclose(head[:3], torch.full((3, 4), -0.5))  # flipped
     assert torch.allclose(head[3:], torch.full((3, 4), 0.5))   # standing untouched
 
@@ -177,7 +177,7 @@ def test_head_jerk_resample_stays_in_ranges_and_zero_prob_noop():
     env = _Env(64)
     env.seat(list(range(64)))
     head = env.command_manager.head._command
-    microduck_mdp.seated_head_command_jerk(env, torch.arange(64), prob=0.0)
+    openchicken_mdp.seated_head_command_jerk(env, torch.arange(64), prob=0.0)
     assert (head == 0).all()
-    microduck_mdp.seated_head_command_jerk(env, torch.arange(64), prob=1.0, flip_frac=0.0)
+    openchicken_mdp.seated_head_command_jerk(env, torch.arange(64), prob=1.0, flip_frac=0.0)
     assert (head.abs() <= 1.0).all() and (head != 0).any()

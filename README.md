@@ -13,7 +13,7 @@ Based on [Pollen Robotics Microduck RL](https://github.com/pollen-robotics/micro
   </tr>
 </table>
 
-RL training environments for [Microduck](https://github.com/pollen-robotics/microduck) —
+RL training environments for OpenChicken —
 a ~800 g, ~25 cm tall bipedal robot — built on
 [mjlab](https://github.com/mujocolab/mjlab) (MuJoCo Warp) with PPO for the native tasks. The added Supertracking task uses a learned world model and differentiable policy optimization.
 Policies are trained here at 50 Hz, exported to ONNX, and deployed on the real
@@ -47,7 +47,7 @@ uv run play Mjlab-Velocity-Flat-OpenChicken --wandb-run-path <entity/project/run
 
 # export to ONNX for deployment
 uv run scripts/export.py Mjlab-Velocity-Flat-OpenChicken --wandb-run-path <...>
-uv run publish --onnx output.onnx --repo <user>/microduck-<name> --kind episodic --duration-s 4.0   # share it (see "Publishing a policy")
+uv run publish --onnx output.onnx --repo <user>/openchicken-<name> --kind episodic --duration-s 4.0   # share it (see "Publishing a policy")
 
 # drive the exported policy in CPU MuJoCo with the keyboard
 uv run scripts/infer_policy.py --walking output.onnx
@@ -67,8 +67,8 @@ instead of locally (see [scripts/hf/README.md](scripts/hf/README.md)).
 
 All task IDs in this fork use `OpenChicken`. For commands referencing an older
 run, replace `MicroDuck` with `OpenChicken` in the task ID; old IDs are no longer
-registered. This rename does not change task configurations or checkpoint
-formats. The internal Python package remains `mjlab_microduck`.
+registered. Task IDs remain stable. The new robot changes geometry and joint state layout;
+old checkpoints require explicit validation before reuse. The internal Python package is `mjlab_openchicken` (renamed with the OpenChicken model migration).
 
 `uv run list-envs` prints the live registry. Flat/Rough variants exist where noted.
 
@@ -121,7 +121,7 @@ output side of the play, both the firmware PD emulation
 (`BacklashEncoderBamActuator`) and the `joint_pos`/`joint_vel` observations
 read *through* the backlash (`qpos[servo] + qpos[backlash]`). Observation and
 action dims are unchanged, so ONNX export and the runtime need no changes.
-See `src/mjlab_microduck/tasks/backlash.py`.
+See `src/mjlab_openchicken/tasks/backlash.py`.
 
 ## SuperMimic / Supertracking
 
@@ -132,12 +132,12 @@ optimizer and RNG state, stored as lossless Git LFS parts.
 
 Our motion-tracking task adapts the learned-world-model approach using
 [Breezewrf's mjlab reproduction](https://github.com/Breezewrf/supermimic_mjlab/tree/a7cee74636a4c596cd8710f8c2e51f82d78bb150)
-as a reference. It is a local Microduck adaptation, not the official SuperMimic
+as a reference. It is a local OpenChicken adaptation, not the official SuperMimic
 implementation. Native PPO tasks keep their existing interfaces.
 
 The world model fits 8-step autoregressive transitions; the actor optimizes a
 32-step imagined rollout through the frozen model, with a lambda-return critic.
-The Microduck adaptation includes BAM M6 actuators, explicit mechanical backlash,
+The OpenChicken adaptation includes BAM M6 actuators, explicit mechanical backlash,
 physical randomization context, and a shared real/imagined sensor chain.
 
 ### Train from scratch
@@ -192,7 +192,7 @@ prediction uses the four ordered delivered targets. Partial resets do not
 advance other environments' queues.
 
 Training excludes root-velocity impulse pushes. Independent push evaluation is
-available through `make_microduck_supertracking_env_cfg(robust=True, push_test=True)`;
+available through `make_openchicken_supertracking_env_cfg(robust=True, push_test=True)`;
 its post-push state is refreshed before reading derived velocities.
 
 Optional `--replay-device cpu`, `--constraint-capacity` and `--contact-capacity`
@@ -275,7 +275,7 @@ All tasks use the [BAM](https://github.com/Rhoban/bam) M6 actuator model for
 the Dynamixel XL330 (voltage control law, back-EMF, Coulomb/Stribeck/load-dependent
 friction), with per-env domain randomization on battery voltage, voltage sag
 under load, command delay, and friction magnitude
-(`FrictionDRBamActuator` in `src/mjlab_microduck/actuator/`).
+(`FrictionDRBamActuator` in `src/mjlab_openchicken/actuator/`).
 
 At this scale — tiny servos driving a ~800 g biped — actuator fidelity is most
 of the sim2real gap, which is why the actuator is modeled down to its voltage
@@ -283,20 +283,38 @@ control law instead of an ideal PD.
 
 ## Robot models
 
-MJCF models live in `src/mjlab_microduck/robot/microduck/` and are exported
-from Onshape with [onshape-to-robot](https://github.com/Rhoban/onshape-to-robot),
-one `config_mjcf_*.json` per model:
+MJCF models live in `src/mjlab_openchicken/robot/openchicken/`. The imported
+OpenChicken geometry replaces the old robot. All variants have 14 policy servos
+plus an independent `passive_beak` position servo, held closed at zero. Native
+policies retain 61 observation inputs and 14 action outputs; Supertracking keeps
+its 48D history and 32D latent interface.
 
 | XML | Used by |
 |---|---|
-| `robot_walk.xml` | Velocity (stripped trunk/head contacts — falling is cheap) |
-| `robot_groundcontact.xml` | VelStand, StandUp, SitStand, GroundPick, BallKick, Roulade, Supertracking (curated collision set for the parts that touch the floor — body can physically lie on the ground; formerly `robot_allcollisions.xml`) |
-| `robot_groundcontact_rollers.xml` | Roller tasks (passive wheels) |
-| `robot_allcollisions.xml` | True full-collision model — every part has a collision geom. No task uses it yet |
-| `robot_*_backlash.xml` | Backlash task variants (generated by `add_backlash.py`) |
+| `robot_walk.xml` | Velocity, with the imported walking collision set |
+| `robot_groundcontact.xml` | StandUp, SitStand, GroundPick, BallKick, Roulade, Supertracking |
+| `robot_groundcontact_rollers.xml` | Roller tasks, with four passive wheels |
+| `robot_allcollisions.xml` | VelStand protective fall, including servo housing contacts |
+| `robot_allcollisions_rollers.xml` | Full-contact roller model, retained for inspection |
+| `robot_*_backlash.xml` | Matching variants with 14 backlash hinges |
 
-`scene*.xml` files wrap the robots with a floor + keyframes (STAND/SIT/FOLD)
-for quick viewing and for `infer_policy.py`.
+The imported files named `allcollisions` contained a curated collision set.
+That set is retained as `groundcontact`; full-contact models add collision copies
+of the remaining visual meshes while preserving joint, inertia and actuator data.
+
+`scenes/` contains floor/keyframe scenes, ball and room props. `assets/` contains
+runtime meshes. `source/cad/` and `source/urdf/` preserve design/export inputs.
+`export/` holds historical Onshape recipes and the backlash helper. These recipes
+predate the manually integrated OpenChicken head: do not regenerate the runtime
+models directly from them. The imported archive and export log are kept under
+`artifacts/model_import/`.
+
+Existing `motion/assets/` references and checkpoints remain unchanged. Body and
+joint name compatibility does not establish dynamic compatibility with the new
+head; validate stance and motion before starting a long training run. The migration
+audit found the previous HOME pose unstable in a 3-second open-loop hold with
+the new geometry; it is retained as an initial training pose, not a validated
+standing controller. See `artifacts/model_import/validation.json` for results.
 
 <!-- IMAGE — side-by-side render: walk model vs rollers model (or a collision-geom
      visualization). One image here makes the model-variant story instant. -->
@@ -304,16 +322,16 @@ for quick viewing and for `infer_policy.py`.
 ## Project structure
 
 ```
-src/mjlab_microduck/
+src/mjlab_openchicken/
 ├── robot/
-│   ├── microduck/                    # MJCF exports, export configs, scenes, add_backlash.py
-│   └── microduck_constants.py        # robot cfgs, HOME frame, BAM actuator cfg
+│   ├── openchicken/                  # robot XMLs + assets/scenes/export/source
+│   └── openchicken_constants.py        # robot cfgs, HOME frame, BAM actuator cfg
 ├── actuator/friction_dr_bam.py       # BAM + friction DR + backlash encoder feedback
 ├── tasks/
 │   ├── __init__.py                   # task registration (base + backlash variants)
 │   ├── mdp.py                        # rewards, events, observations, custom classes
 │   ├── backlash.py                   # make_backlash_variant() env-cfg wrapper
-│   └── microduck_*_env_cfg.py        # one cfg module per task family
+│   └── openchicken_*_env_cfg.py        # one cfg module per task family
 ├── supertracking/                   # world model, actor/critic, replay and BAM delay queue
 ├── train_cli.py                      # `train` script (identical to mjlab's)
 ├── train_hook.py                     # intercepts `train ... --hf-jobs`
@@ -350,8 +368,8 @@ export and runtime contract described above.
 `uv run publish` puts a policy on the Hugging Face Hub in the shape the robot's
 daemon loads: one `policy.onnx` with the observation normalizer baked in, a
 `manifest.json` following schema 2 of the
-[microduck policy manifest](https://github.com/pollen-robotics/microduck/blob/main/docs/policy-manifest.md),
-and a README saying how to run it. Anyone with a microduck can then install it
+[openchicken policy manifest](https://github.com/pollen-robotics/microduck/blob/main/docs/policy-manifest.md),
+and a README saying how to run it. Anyone with a openchicken can then install it
 with one command, no daemon release needed.
 
 ```bash
@@ -362,32 +380,32 @@ uv run publish --task Mjlab-StandUp-Flat-OpenChicken \
     --description "Stands up from the ground and holds the standing pose."
 
 # From an ONNX you already exported (validated, not re-exported)
-uv run publish --onnx output.onnx --repo <user>/microduck-flamingo \
+uv run publish --onnx output.onnx --repo <user>/openchicken-flamingo \
     --kind perpetual --unwind-s 1.5 --twist-help "[flag, side, 0]"
 
 # A new gait for a slot
-uv run publish --onnx output.onnx --repo <user>/microduck-my-walk --kind perpetual --slot walk
+uv run publish --onnx output.onnx --repo <user>/openchicken-my-walk --kind perpetual --slot walk
 
 # Ship a rollout video too: uploaded as replay.mp4, which the Hub's replay widget plays
 uv run scripts/render_policy.py output.onnx --seconds 10 --video media/bow.mp4
-uv run publish --onnx output.onnx --repo <user>/microduck-bow --kind episodic --duration-s 4.0 \
+uv run publish --onnx output.onnx --repo <user>/openchicken-bow --kind episodic --duration-s 4.0 \
     --video media/bow.mp4
 
 # A remix (warm-started / fine-tuned from someone's published policy): name the parent so the
 # model card sets `base_model` and the Hub links the two
-uv run publish --onnx output.onnx --repo <user>/microduck-deep-bow --kind episodic --duration-s 5.0 \
-    --base-model <owner>/microduck-polite-bow
+uv run publish --onnx output.onnx --repo <user>/openchicken-deep-bow --kind episodic --duration-s 5.0 \
+    --base-model <owner>/openchicken-polite-bow
 
 # See what would be uploaded without touching the Hub
-uv run publish --onnx output.onnx --repo <user>/microduck-bow --kind episodic --duration-s 4.0 --dry-run
+uv run publish --onnx output.onnx --repo <user>/openchicken-bow --kind episodic --duration-s 4.0 --dry-run
 ```
 
 Then on a robot:
 
 ```bash
-sudo robotctl policy add polite-bow <user>/microduck-polite-bow   # episodic: length comes from the manifest
-sudo robotctl policy add flamingo <user>/microduck-flamingo --hold 5   # held pose: you pick how long
-sudo robotctl policy load walk <user>/microduck-my-walk                # gait: into the walk slot
+sudo robotctl policy add polite-bow <user>/openchicken-polite-bow   # episodic: length comes from the manifest
+sudo robotctl policy add flamingo <user>/openchicken-flamingo --hold 5   # held pose: you pick how long
+sudo robotctl policy load walk <user>/openchicken-my-walk                # gait: into the walk slot
 robotctl robot do polite-bow
 ```
 
@@ -427,7 +445,7 @@ reset isolation and Replay transfers, and are skipped when CUDA is unavailable.
 
 ## Related projects
 
-- [microduck](https://github.com/pollen-robotics/microduck) — the Microduck project home, including the onboard runtime that runs the exported policies
+- [openchicken](https://github.com/pollen-robotics/microduck) — the OpenChicken project home, including the onboard runtime that runs the exported policies
 - [mjlab](https://github.com/mujocolab/mjlab) — the training framework (MuJoCo Warp + rsl_rl)
 - [BAM](https://github.com/Rhoban/bam) — better actuator models, by Rhoban
 
@@ -439,7 +457,7 @@ code and model licenses below.
 
 The code in this repository is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
 
-The 3D model files (the `.stl` meshes in `src/mjlab_microduck/robot/microduck/assets/`
-and `src/mjlab_microduck/robot/xl330_test_bench/assets/`) are licensed under
+The 3D model files (the `.stl` meshes in `src/mjlab_openchicken/robot/openchicken/assets/`
+and `src/mjlab_openchicken/robot/xl330_test_bench/assets/`) are licensed under
 [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 See [LICENSE-MODELS.md](LICENSE-MODELS.md) for the exact scope and attribution.

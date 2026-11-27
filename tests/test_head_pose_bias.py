@@ -11,7 +11,7 @@ import math
 
 import torch
 
-from mjlab_microduck.tasks import mdp as microduck_mdp
+from mjlab_openchicken.tasks import mdp as openchicken_mdp
 
 
 class _Data:
@@ -80,7 +80,7 @@ def _set_pose(env, z, pitch_deg):
 def _run(env, steps, **kw):
     out = None
     for _ in range(steps):
-        out = microduck_mdp.head_pose_bias_penalty(env, tau_s=1.0, **kw)
+        out = openchicken_mdp.head_pose_bias_penalty(env, tau_s=1.0, **kw)
     return out
 
 
@@ -137,11 +137,11 @@ def test_reset_clears_the_ema():
 
 
 def test_standup_cfg_wiring():
-    from mjlab_microduck.tasks.microduck_standup_env_cfg import (
-        make_microduck_standup_env_cfg,
+    from mjlab_openchicken.tasks.openchicken_standup_env_cfg import (
+        make_openchicken_standup_env_cfg,
     )
 
-    cfg = make_microduck_standup_env_cfg()
+    cfg = make_openchicken_standup_env_cfg()
     term = cfg.rewards["head_pose_bias"]
     assert term.weight == 0.0                       # discovery phase untouched
     assert term.params["gate_height_low"] is not None
@@ -155,22 +155,22 @@ def test_standup_cfg_wiring():
 
 
 def test_velocity_cfg_unchanged_no_gate():
-    from mjlab_microduck.tasks.microduck_velocity_env_cfg import (
-        make_microduck_velocity_env_cfg,
+    from mjlab_openchicken.tasks.openchicken_velocity_env_cfg import (
+        make_openchicken_velocity_env_cfg,
     )
 
-    cfg = make_microduck_velocity_env_cfg()
+    cfg = make_openchicken_velocity_env_cfg()
     assert "gate_height_low" not in cfg.rewards["head_pose_bias"].params
 
 
 def test_velstand_inherited_term_is_gated():
     # Velstand episodes survive falls — the inherited velocity-env term must not
     # charge the ground phase.
-    from mjlab_microduck.tasks.microduck_velstand_env_cfg import (
-        make_microduck_velstand_env_cfg,
+    from mjlab_openchicken.tasks.openchicken_velstand_env_cfg import (
+        make_openchicken_velstand_env_cfg,
     )
 
-    cfg = make_microduck_velstand_env_cfg()
+    cfg = make_openchicken_velstand_env_cfg()
     params = cfg.rewards["head_pose_bias"].params
     assert params.get("gate_height_low") is not None
     assert params["gate_tilt_zero_deg"] == 40.0  # REWARD_GATE_TILT_DEG

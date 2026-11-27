@@ -16,7 +16,7 @@ on PATH ("can't open input file Mjlab-Velocity-Flat-MicroDuck").
 Three things must hold, none of which fails loudly on its own:
 
 1. `train` stays declared, and stays behaviorally identical to mjlab's.
-2. mjlab must still reach `mjlab_microduck.tasks` before it parses argv — a
+2. mjlab must still reach `mjlab_openchicken.tasks` before it parses argv — a
    refactor of mjlab's plugin loading would silently drop the flag.
 3. Both shims must intercept, since which one lands in bin/ is not ours to
    decide.
@@ -31,7 +31,7 @@ from pathlib import Path
 
 import pytest
 
-from mjlab_microduck import train_hook
+from mjlab_openchicken import train_hook
 
 _ROOT = Path(__file__).resolve().parents[1]
 _TASK = "Mjlab-Velocity-Flat-OpenChicken"
@@ -44,7 +44,7 @@ def _our_scripts():
 
 def test_train_script_stays_declared():
     """Removing it uninstalls bin/train and recreates nothing (see docstring)."""
-    assert _our_scripts().get("train") == "mjlab_microduck.train_cli:main", (
+    assert _our_scripts().get("train") == "mjlab_openchicken.train_cli:main", (
         "[project.scripts] must keep declaring `train`. Both this package and "
         "mjlab claim bin/train in their RECORD, so dropping the declaration "
         "makes `uv sync` DELETE the script instead of reverting it to mjlab's, "
@@ -56,7 +56,7 @@ def test_our_train_script_only_delegates_to_mjlab():
     """The collision is only safe while the two shims are interchangeable."""
     import mjlab.scripts.train
 
-    from mjlab_microduck import train_cli
+    from mjlab_openchicken import train_cli
 
     called = []
     original = mjlab.scripts.train.main
@@ -74,7 +74,7 @@ def test_train_on_path_is_a_mjlab_trainer():
     exe = shutil.which("train")
     assert exe is not None, (
         "no `train` on PATH — the venv script was uninstalled and not recreated; "
-        "run `uv sync --reinstall-package mjlab-microduck`."
+        "run `uv sync --reinstall-package mjlab-openchicken`."
     )
     head = Path(exe).read_bytes()[:8192]
     assert b"mjlab" in head, (
@@ -85,9 +85,9 @@ def test_train_on_path_is_a_mjlab_trainer():
 
 def test_we_register_the_task_plugin_entry_point():
     """The interception rides on this entry point; without it, no flag."""
-    groups = {ep.group: ep.value for ep in distribution("mjlab-microduck").entry_points}
-    assert groups.get("mjlab.tasks") == "mjlab_microduck.tasks", (
-        "the `mjlab.tasks` entry point must stay pointed at mjlab_microduck.tasks: "
+    groups = {ep.group: ep.value for ep in distribution("mjlab-openchicken").entry_points}
+    assert groups.get("mjlab.tasks") == "mjlab_openchicken.tasks", (
+        "the `mjlab.tasks` entry point must stay pointed at mjlab_openchicken.tasks: "
         "it is both how tasks register AND where --hf-jobs is intercepted."
     )
 
@@ -96,7 +96,7 @@ def test_we_register_the_task_plugin_entry_point():
 def fake_submit(monkeypatch):
     calls = []
     monkeypatch.setattr(
-        "mjlab_microduck.hf_jobs.submit", lambda argv: calls.append(argv) or 0
+        "mjlab_openchicken.hf_jobs.submit", lambda argv: calls.append(argv) or 0
     )
     return calls
 
@@ -115,7 +115,7 @@ def test_hook_submits_and_strips_the_flag(monkeypatch, fake_submit):
 
 
 def test_hook_propagates_the_submission_exit_code(monkeypatch):
-    monkeypatch.setattr("mjlab_microduck.hf_jobs.submit", lambda argv: 3)
+    monkeypatch.setattr("mjlab_openchicken.hf_jobs.submit", lambda argv: 3)
     monkeypatch.setattr(sys, "argv", ["train", _TASK, "--hf-jobs"])
     with pytest.raises(SystemExit) as exc:
         train_hook.maybe_submit_to_hf_jobs()
@@ -137,7 +137,7 @@ def test_other_commands_do_not_submit(monkeypatch, fake_submit):
 
 def test_interception_is_disarmed_inside_the_job(monkeypatch, fake_submit):
     """Otherwise a leaked flag would make the job submit another job."""
-    monkeypatch.setenv("MICRODUCK_IN_HF_JOB", "1")
+    monkeypatch.setenv("OPENCHICKEN_IN_HF_JOB", "1")
     monkeypatch.setattr(sys, "argv", ["train", _TASK, "--hf-jobs"])
     assert train_hook.maybe_submit_to_hf_jobs() is None
     assert fake_submit == []
@@ -145,7 +145,7 @@ def test_interception_is_disarmed_inside_the_job(monkeypatch, fake_submit):
 
 def test_submitted_job_env_disarms_the_interception():
     """The env var above is only useful if submit() actually sets it."""
-    src = (_ROOT / "src/mjlab_microduck/hf_jobs.py").read_text()
+    src = (_ROOT / "src/mjlab_openchicken/hf_jobs.py").read_text()
     assert f'"{train_hook._IN_JOB_ENV}": "1"' in src, (
         f"submit() must put {train_hook._IN_JOB_ENV} on the job's env"
     )
@@ -159,7 +159,7 @@ _PROBE = """
 import sys
 sys.argv = ["train", "{task}", "--env.scene.num-envs", "4096", "--hf-jobs"]
 
-import mjlab_microduck.hf_jobs as hf_jobs
+import mjlab_openchicken.hf_jobs as hf_jobs
 
 def fake_submit(argv):
     print("SUBMIT", argv, flush=True)
@@ -181,7 +181,7 @@ _SHIMS = {
     # exactly what a bin/train written by mjlab does
     "mjlab": "from mjlab.scripts.train import main",
     # ... and what one written by this package does
-    "ours": "from mjlab_microduck.train_cli import main; main()",
+    "ours": "from mjlab_openchicken.train_cli import main; main()",
 }
 
 

@@ -58,20 +58,24 @@ def repair(source, cycle_path, output):
         reference = {key: raw[key] for key in raw.files}
     cycle = np.load(cycle_path)["qpos"]
     assert tuple(reference["joint_names"]) == names
-    assert cycle.shape == (250, model.nq)
+    assert cycle.shape == (250, 7 + len(names))
     assert len(reference["time"]) == 501 and reference["fps"] == 50
     sample_indices = np.arange(501) * 3 % 250
     original = np.c_[reference["root_pos"], reference["root_quat_wxyz"], reference["joint_pos"]]
     assert np.allclose(original, cycle[sample_indices], atol=1e-12)
-    fixed = repair_cycle(model, names, cycle)
+    joint_ids = [model.joint(n).id for n in names]
+    qadr, vadr = model.jnt_qposadr[joint_ids], model.jnt_dofadr[joint_ids]
+    full_cycle = np.tile(model.qpos0, (len(cycle), 1))
+    full_cycle[:, :7], full_cycle[:, qadr] = cycle[:, :7], cycle[:, 7:]
+    fixed = repair_cycle(model, names, full_cycle)
     addresses = np.array([model.joint(n).qposadr[0] for n in names if n.startswith("left_")])
     poses = fixed[sample_indices]
     velocity = differentiate(model, poses, .02)
-    reference["joint_pos"] = poses[:, 7:]
-    reference["joint_vel"] = velocity[:, 6:]
+    reference["joint_pos"] = poses[:, qadr]
+    reference["joint_vel"] = velocity[:, vadr]
     reference["kinematic_only"] = np.array(True)
     np.savez_compressed(output / "style_reference_50hz.npz", **reference)
-    np.savez_compressed(output / "cycle_150hz.npz", time=np.arange(250) / 150, qpos=fixed)
+    np.savez_compressed(output / "cycle_150hz.npz", time=np.arange(250) / 150, qpos=np.c_[fixed[:, :7], fixed[:, qadr]])
 
     # Audit the actual 50 Hz samples AND their subframes. This is the explicit
     # interpolation contract: linear positions/joints, shortest-path root SLERP.

@@ -25,7 +25,7 @@ PARAMS_FILE = BAM_DIR / "params" / "xl330" / "m6_new.json"
 TESTBENCH_XML = (
     Path(__file__).resolve().parent.parent
     / "src"
-    / "mjlab_microduck"
+    / "mjlab_openchicken"
     / "robot"
     / "xl330_test_bench"
     / "scene.xml"

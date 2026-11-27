@@ -1,7 +1,7 @@
 """Find the wandb checkpoint a deployed ONNX was exported from (bit-exact actor weights).
 
     uv run scripts/find_onnx_source.py hf://pollen-robotics/microduck-policies/roulade.onnx \\
-        --experiment microduck_roulade [--project pollen-robotics/mjlab_microduck]
+        --experiment openchicken_roulade [--project pollen-robotics/mjlab_microduck]
 
 Scans every run of the experiment (config train_cfg.experiment_name), newest run and newest
 checkpoint first, and stops at the first match (each candidate costs one ~5 MB download).
@@ -19,7 +19,7 @@ from pathlib import Path
 
 import wandb
 
-from mjlab_microduck.publish.training import _fetch_onnx, _retry, onnx_matches_checkpoint
+from mjlab_openchicken.publish.training import _fetch_onnx, _retry, onnx_matches_checkpoint
 
 
 def main() -> int:

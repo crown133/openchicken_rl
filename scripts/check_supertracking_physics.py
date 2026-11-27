@@ -10,16 +10,16 @@ from scipy.spatial.transform import Rotation
 import torch
 
 from mjlab.envs import ManagerBasedRlEnv
-from mjlab_microduck.robot.microduck_constants import MICRODUCK_STANDUP_ROBOT_CFG
-from mjlab_microduck.tasks.microduck_velocity_env_cfg import make_microduck_velocity_env_cfg
+from mjlab_openchicken.robot.openchicken_constants import OPENCHICKEN_ALLCOLLISIONS_ROBOT_CFG
+from mjlab_openchicken.tasks.openchicken_velocity_env_cfg import make_openchicken_velocity_env_cfg
 from prepare_supertracking_motion import geom_vertices, sha256, training_model
 
 
 def audit(motion_path, output, device):
     with np.load(motion_path, allow_pickle=False) as raw:
         motion = {k: raw[k] for k in raw.files}
-    cfg = make_microduck_velocity_env_cfg(play=True)
-    cfg.scene.entities = {"robot": deepcopy(MICRODUCK_STANDUP_ROBOT_CFG)}
+    cfg = make_openchicken_velocity_env_cfg(play=True)
+    cfg.scene.entities = {"robot": deepcopy(OPENCHICKEN_ALLCOLLISIONS_ROBOT_CFG)}
     cfg.scene.sensors = ()
     cfg.scene.num_envs = 16
     cfg.observations = {}
@@ -40,20 +40,25 @@ def audit(motion_path, output, device):
     env = ManagerBasedRlEnv(cfg, device=device)
     try:
         robot = env.scene["robot"]
-        assert tuple(motion["joint_names"]) == robot.joint_names
+        names = tuple(n for n in robot.joint_names if not n.startswith("passive_"))
+        assert tuple(motion["joint_names"]) == names
+        servo_ids = [robot.joint_names.index(n) for n in names]
         assert abs(env.step_dt - .02) < 1e-9
         env.reset()
         model, _, _ = training_model()
         data = mujoco.MjData(model)
-        qadr = np.array([model.joint(n).qposadr[0] for n in robot.joint_names])
+        qadr = np.array([model.joint(n).qposadr[0] for n in names])
         home = model.qpos0.copy()
-        home[qadr] = robot.data.default_joint_pos[0].cpu().numpy()
+        home[qadr] = robot.data.default_joint_pos[0, servo_ids].cpu().numpy()
         data.qpos[:] = home
         mujoco.mj_forward(model, data)
         foot_ids = [model.geom(n).id for n in ("left_foot_collision", "right_foot_collision")]
         home[2] -= min(geom_vertices(model, data, g)[:, 2].min() for g in foot_ids)
         labels = ["home", "ready", "up", "recenter", "down"]
-        targets = np.stack([home, *motion["qpos"][[0, 16, 38, 56]]])
+        reference_qpos = np.tile(model.qpos0, (len(motion["qpos"]), 1))
+        reference_qpos[:, :7] = motion["qpos"][:, :7]
+        reference_qpos[:, qadr] = motion["joint_pos"]
+        targets = np.stack([home, *reference_qpos[[0, 16, 38, 56]]])
         starts = np.repeat(targets, 3, axis=0)
         rng = np.random.default_rng(42)
         for i in range(len(starts)):
@@ -61,7 +66,7 @@ def audit(motion_path, output, device):
                 starts[i, qadr] += rng.normal(0, np.deg2rad(.5), len(qadr))
                 rot = Rotation.from_rotvec(rng.normal(0, np.deg2rad(.5), 3))
                 starts[i, 3:7] = (rot * Rotation.from_quat(starts[i, 3:7], scalar_first=True)).as_quat(scalar_first=True)
-        starts = np.concatenate([starts, motion["qpos"][:1]])
+        starts = np.concatenate([starts, reference_qpos[:1]])
         origins = env.scene.env_origins.cpu().numpy()
         initial = starts.copy()
         initial[:, :3] += origins
@@ -77,7 +82,7 @@ def audit(motion_path, output, device):
         poses, velocities, torques = [starts.copy()], [], []
         for frame in range(500):
             desired = np.concatenate([fixed_q, motion["joint_pos"][frame:frame + 1]])
-            actions = torch.tensor(desired, dtype=torch.float32, device=device) - robot.data.default_joint_pos
+            actions = torch.tensor(desired, dtype=torch.float32, device=device) - robot.data.default_joint_pos[:, servo_ids]
             env.step(actions)
             current = env.sim.data.qpos[:].cpu().numpy().copy()
             current[:, :3] -= origins
@@ -97,7 +102,7 @@ def audit(motion_path, output, device):
             matrices = Rotation.from_quat(actual[:, 3:7], scalar_first=True).as_matrix()
             tilt = np.rad2deg(np.arccos(np.clip(matrices[:, 2, 2], -1, 1)))
             fail = (tilt > 45) | (actual[:, 2] < .055) | ~np.isfinite(actual).all(axis=1)
-            desired = targets[i // 3][None, :] if i < 15 else motion["qpos"]
+            desired = targets[i // 3][None, :] if i < 15 else reference_qpos
             cases.append({
                 "name": f"{labels[i // 3]}_seed{i % 3}" if i < 15 else "v12_replay",
                 "duration_s": (end - 1) / 50, "max_tilt_deg": float(tilt.max()),

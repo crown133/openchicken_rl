@@ -17,7 +17,7 @@ import time
 import mujoco
 import mujoco.viewer
 
-from mjlab_microduck.robot.microduck_constants import (
+from mjlab_openchicken.robot.openchicken_constants import (
     get_walk_rollers_spec,
     HOME_FRAME,
 )

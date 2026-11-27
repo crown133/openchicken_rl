@@ -1,4 +1,4 @@
-"""Train Microduck V12 with a learned world model and differentiable imagination."""
+"""Train OpenChicken V12 with a learned world model and differentiable imagination."""
 import argparse
 from dataclasses import asdict
 import json
@@ -8,10 +8,10 @@ import sys
 
 import torch
 from mjlab.envs import ManagerBasedRlEnv
-from mjlab_microduck.tasks.microduck_supertracking_env_cfg import (
-    MicroduckSupertrackingRlCfg, make_microduck_supertracking_env_cfg, ROBUST_MOTION,
+from mjlab_openchicken.tasks.openchicken_supertracking_env_cfg import (
+    OpenChickenSupertrackingRlCfg, make_openchicken_supertracking_env_cfg, ROBUST_MOTION,
 )
-from mjlab_microduck.supertracking.runner import SupertrackingRunner
+from mjlab_openchicken.supertracking.runner import SupertrackingRunner
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
     parser.add_argument('--robust', action='store_true', help='Backlash, domain randomization and delayed sensors; 12s reference')
     args = parser.parse_args()
     torch.set_num_threads(4)
-    cfg = asdict(MicroduckSupertrackingRlCfg())
+    cfg = asdict(OpenChickenSupertrackingRlCfg())
     num_envs = 256
     if args.resume:
         checkpoint = torch.load(args.resume, map_location='cpu', weights_only=False)
@@ -60,7 +60,7 @@ def main():
     if num_envs < 8:
         raise ValueError('At least eight environments are needed for held-out validation')
     torch.manual_seed(cfg['seed'])
-    env_cfg = make_microduck_supertracking_env_cfg(robust=cfg['robust'])
+    env_cfg = make_openchicken_supertracking_env_cfg(robust=cfg['robust'])
     if cfg.get('constraint_capacity') is not None:
         env_cfg.sim.njmax = cfg['constraint_capacity']
     if cfg.get('contact_capacity') is not None:

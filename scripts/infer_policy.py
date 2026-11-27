@@ -19,21 +19,21 @@ import mujoco
 import mujoco.viewer
 import onnxruntime as ort
 
-MICRODUCK_XML = "src/mjlab_microduck/robot/microduck/scene.xml"
-# MICRODUCK_XML = "src/mjlab_microduck/robot/microduck/scene_ramps.xml"
-# MICRODUCK_XML = "src/mjlab_microduck/robot/microduck/scene_floor_objects.xml"
-# MICRODUCK_XML = "src/mjlab_microduck/robot/microduck/scene_robot_walk.xml"
-MICRODUCK_ROLLERS_XML = "src/mjlab_microduck/robot/microduck/scene_rollers.xml"
-MICRODUCK_BALL_XML = "src/mjlab_microduck/robot/microduck/scene_ball.xml"
+OPENCHICKEN_XML = "src/mjlab_openchicken/robot/openchicken/scenes/scene.xml"
+# OPENCHICKEN_XML = "src/mjlab_openchicken/robot/openchicken/scenes/scene_ramps.xml"
+# OPENCHICKEN_XML = "src/mjlab_openchicken/robot/openchicken/scenes/scene_floor_objects.xml"
+# OPENCHICKEN_XML = "src/mjlab_openchicken/robot/openchicken/scenes/scene_robot_walk.xml"
+OPENCHICKEN_ROLLERS_XML = "src/mjlab_openchicken/robot/openchicken/scenes/scene_rollers.xml"
+OPENCHICKEN_BALL_XML = "src/mjlab_openchicken/robot/openchicken/scenes/scene_ball.xml"
 
 # BAM M6 defaults — MUST mirror `_BAM_ACTUATOR_KWARGS` in
-# src/mjlab_microduck/robot/microduck_constants.py (the actuator every policy is
+# src/mjlab_openchicken/robot/openchicken_constants.py (the actuator every policy is
 # trained against in warp). Not imported from there: that module drags in
 # mjlab/torch/warp (~16 s import) for a CPU rehearsal script. Locked by
 # tests/test_infer_policy_bam.py.
 BAM_MOTOR_NAME = "xl330"
 BAM_MODEL = "m6"
-BAM_KP_FW = 200.0                 # microduck's preserved firmware stiffness
+BAM_KP_FW = 200.0                 # openchicken's preserved firmware stiffness
 BAM_VIN_RANGE = (6.5, 8.2)        # per-env battery voltage DR in training
 BAM_VIN_DROP_GAIN_RANGE = (0.0, 0.2)  # load-dependent sag V_drop = gain * sum|tau|
 BAM_VIN_MIN = 6.0                 # floor on effective voltage after sag
@@ -54,6 +54,12 @@ def load_bam_model(kp_fw: float, vin: float, max_current):
     bam_model.actuator.vin = vin
     bam_model.actuator.max_current = max_current if (max_current and max_current > 0) else None
     return bam_model
+
+
+def policy_actuator_ids(model):
+    """The 14 policy servos; auxiliary beak control is kept separate."""
+    return [i for i in range(model.nu)
+            if not model.joint(int(model.actuator_trnid[i, 0])).name.startswith("passive_")]
 
 
 def load_mujoco_with_bam(xml_path: str, bam_model, timestep: float, vin_drop_gain, vin_min):
@@ -110,7 +116,7 @@ BODY_CMD_MAX_Z = 0.03              # ±30 mm
 BODY_CMD_MAX_XY = 0.02             # ±20 mm
 BODY_CMD_MAX_ANGLE = math.radians(30)  # ±30°
 
-# Ball placement for kick behaviors (must match microduck_ball_kick_env_cfg's
+# Ball placement for kick behaviors (must match openchicken_ball_kick_env_cfg's
 # reset_ball_in_front_of_foot params: ball center in the robot's yaw frame).
 BALL_OFFSET_X = 0.09
 BALL_OFFSET_ABS_Y = 0.042
@@ -120,7 +126,7 @@ BALL_RADIUS = 0.035
 # This is the reference pose that:
 # - Actions are offsets from (motor_target = DEFAULT_POSE + action * scale)
 # - Joint observations are relative to (obs_joint_pos = current_pos - DEFAULT_POSE)
-# STAND2 pose (matches HOME_FRAME in microduck_constants.py): trunk shifted
+# STAND2 pose (matches HOME_FRAME in openchicken_constants.py): trunk shifted
 # ~5mm forward so the CoM sits over the ankle axis. Leg pitch chain leaned
 # forward vs the old pose: hip_pitch 30°→26.24°, ankle 30°→25.95°, knee 0°→0.28°.
 DEFAULT_POSE = np.array([
@@ -382,16 +388,17 @@ class PolicyInference:
         print(f"  trunk_base: id={self.trunk_base_id}")
 
         # Joint information
-        self.n_joints = model.nu
+        self.policy_actuator_ids = policy_actuator_ids(model)
+        self.n_joints = len(self.policy_actuator_ids)
 
         # For robots with passive/interspersed joints (e.g. roller skates), the actuated
         # joints are not contiguous in qpos/qvel. Compute the correct indices from the
         # actuator transmission joint IDs so extraction works for any joint ordering.
         self.joint_qpos_indices = [
-            int(model.jnt_qposadr[model.actuator_trnid[i, 0]]) for i in range(model.nu)
+            int(model.jnt_qposadr[model.actuator_trnid[i, 0]]) for i in self.policy_actuator_ids
         ]
         self.joint_qvel_indices = [
-            int(model.jnt_dofadr[model.actuator_trnid[i, 0]]) for i in range(model.nu)
+            int(model.jnt_dofadr[model.actuator_trnid[i, 0]]) for i in self.policy_actuator_ids
         ]
 
         # Default pose for the policy (flexed legs)
@@ -891,13 +898,13 @@ class PolicyInference:
         if self.bam_ctrl is not None:
             self.bam_ctrl.q_target[:] = target_positions
         else:
-            self.data.ctrl[:] = target_positions
+            self.data.ctrl[self.policy_actuator_ids] = target_positions
 
 
 # ---------------------------------------------------------------------------
 # Odometry anchor points (--odom-anchor-points, --odom-compare)
 #
-# The robot's contact odometry (microduck/odometry/src/lib.rs) tracks the trunk
+# The robot's contact odometry (openchicken/odometry/src/lib.rs) tracks the trunk
 # from the lowest of a set of candidate contact points on the soles, expressed
 # in each foot's site frame. scripts/odom_anchor_points.py samples those sets
 # on the sole mesh and writes them to scripts/odom_anchor_sets.json:
@@ -967,7 +974,7 @@ class FootFrames:
 
 
 class PyOdometry:
-    """Line-for-line replica of microduck/odometry/src/lib.rs `Odometry::update`
+    """Line-for-line replica of openchicken/odometry/src/lib.rs `Odometry::update`
     for one anchor set: anchor the lowest sole point to the ground, orient the
     trunk by the IMU, move the anchor when another point drops below it and
     holds the claim for SWITCH_CONFIRM_TICKS."""
@@ -1170,7 +1177,7 @@ class OdomAnchorOverlay:
 def main():
     parser = argparse.ArgumentParser(description="Run ONNX policy in MuJoCo")
     parser.add_argument("--roller", action="store_true", help="Use roller skate robot XML (robot_walk_rollers.xml)")
-    parser.add_argument("--scene", type=str, default=None, help="Path to a scene XML, overriding the default pick (e.g. src/mjlab_microduck/robot/microduck/scene_allcollisions.xml)")
+    parser.add_argument("--scene", type=str, default=None, help="Path to a scene XML, overriding the default pick (e.g. src/mjlab_openchicken/robot/openchicken/scenes/scene_allcollisions.xml)")
     parser.add_argument("--walking", type=str, default=None, help="Path to walking policy ONNX file")
     parser.add_argument("--standing", "-s", type=str, default=None, help="Path to standing policy ONNX file")
     parser.add_argument("--ground-pick", type=str, default=None, help="Path to ground pick policy ONNX file (press G to activate)")
@@ -1264,11 +1271,11 @@ def main():
     if args.scene:
         xml_path = args.scene
     elif args.roller:
-        xml_path = MICRODUCK_ROLLERS_XML
+        xml_path = OPENCHICKEN_ROLLERS_XML
     elif args.kick_left or args.kick_right:
-        xml_path = MICRODUCK_BALL_XML
+        xml_path = OPENCHICKEN_BALL_XML
     else:
-        xml_path = MICRODUCK_XML
+        xml_path = OPENCHICKEN_XML
     print(f"Loading MuJoCo model from: {xml_path}")
     bam_ctrl = None
     if not args.no_bam:
@@ -1294,9 +1301,10 @@ def main():
         from bam.model import load_model
         kt = load_model(motor_name="xl330", model="m6").kt.value
         torque_limit = kt * args.current_limit
-        model.actuator_forcerange[:, 0] = -torque_limit
-        model.actuator_forcerange[:, 1] = torque_limit
-        model.actuator_forcelimited[:] = 1
+        servo_ids = policy_actuator_ids(model)
+        model.actuator_forcerange[servo_ids, 0] = -torque_limit
+        model.actuator_forcerange[servo_ids, 1] = torque_limit
+        model.actuator_forcelimited[servo_ids] = 1
         print(f"Current limit: {args.current_limit:.2f} A -> torque limit "
               f"+/-{torque_limit:.4f} Nm (kt={kt:.4f})")
 
@@ -1458,7 +1466,7 @@ def main():
             bam_ctrl.model.actuator.kp = args.kp_fw * (_STANDBY_KP / _XML_KP_NOMINAL if on else 1.0)
             print(f"  BAM kp_fw set to {bam_ctrl.model.actuator.kp:.0f}")
             return
-        for i in range(model.nu):
+        for i in policy_actuator_ids(model):
             kp = _STANDBY_KP if on else original_kp[i]
             model.actuator_gainprm[i, 0] = kp
             model.actuator_biasprm[i, 1] = -kp

@@ -3,7 +3,7 @@ the training's welded hand in it.
 
     uv run python scripts/pickup_e2e_robotd.py [--video logs/pickup/e2e_robotd.mp4] [--scenario v2]
 
-Needs the microduck checkout at ~/Pollen/microduck with `target/debug/robotd` built (the branch
+Needs the openchicken checkout at ~/Pollen/openchicken with `target/debug/robotd` built (the branch
 carrying `[pickup]`). Walks the duck with velstand, picks it up mid-walk (shaken), sets it down,
 stands, lifts it gently, sets it down, walks and turns, carries it upside down, sets it down — and
 prints robotd's pause/resume edges against the hand's ground truth, plus robotd's own log lines.
@@ -13,11 +13,11 @@ from pathlib import Path
 
 import mujoco, numpy as np, torch
 
-from mjlab_microduck.sim import body_server as bs
-from mjlab_microduck.pickup.hand import VirtualHand, HandCfg, add_hand_to_spec
+from mjlab_openchicken.sim import body_server as bs
+from mjlab_openchicken.pickup.hand import VirtualHand, HandCfg, add_hand_to_spec
 
-MICRODUCK = Path.home() / "Pollen/microduck"
-RL = Path.home() / "Pollen/microduck_rl"
+OPENCHICKEN = Path.home() / "Pollen/openchicken"
+RL = Path.home() / "Pollen/openchicken_rl"
 PORT = 7811
 VIDEO = sys.argv[sys.argv.index("--video") + 1] if "--video" in sys.argv else None
 
@@ -80,12 +80,12 @@ enabled = false
 
 [pickup]
 enabled = true
-model = "{MICRODUCK}/duck-control/models/pickup_detector.onnx"
+model = "{OPENCHICKEN}/duck-control/models/pickup_detector.onnx"
 """)
 sock = state / "duck.sock"
 log = open(state / "robotd.log", "w")
 env = dict(os.environ, ORT_DYLIB_PATH=str(ort), RUST_LOG="info", DUCK_RUNTIME_DIR=str(state))
-robotd = subprocess.Popen([str(MICRODUCK / "target/debug/robotd"), "--sim", f"127.0.0.1:{PORT}",
+robotd = subprocess.Popen([str(OPENCHICKEN / "target/debug/robotd"), "--sim", f"127.0.0.1:{PORT}",
                            "--params", str(params), "--socket", str(sock)], stdout=log, stderr=subprocess.STDOUT, env=env)
 
 def rpc(method, params=None):

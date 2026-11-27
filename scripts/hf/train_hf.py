@@ -1,4 +1,4 @@
-"""Back-compat shim: the submission logic moved to mjlab_microduck.hf_jobs.
+"""Back-compat shim: the submission logic moved to mjlab_openchicken.hf_jobs.
 
 Prefer the integrated flag:
     uv run train <task> <train args...> --hf-jobs [--namespace <ns>] [...]
@@ -9,7 +9,7 @@ This script keeps the old invocation working:
 
 import sys
 
-from mjlab_microduck.hf_jobs import submit
+from mjlab_openchicken.hf_jobs import submit
 
 if __name__ == "__main__":
     sys.exit(submit(sys.argv[1:]))

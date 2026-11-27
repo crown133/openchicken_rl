@@ -31,11 +31,11 @@ from infer_policy import (  # noqa: E402
     BAM_MAX_CURRENT, BAM_STIFF_SOLIMP_FRICTION, BAM_STIFF_SOLREF_FRICTION, DEFAULT_POSE, TerminalInput, load_bam_model,
 )
 
-from mjlab_microduck.pickup.features import FEAT_DIM, paused_target_rel  # noqa: E402
-from mjlab_microduck.pickup.hand import CARRY, LOWER, HandCfg, VirtualHand, add_hand_to_spec  # noqa: E402
-from mjlab_microduck.pickup.model import WINDOW, PauseStateMachine, StateMachineCfg  # noqa: E402
+from mjlab_openchicken.pickup.features import FEAT_DIM, paused_target_rel  # noqa: E402
+from mjlab_openchicken.pickup.hand import CARRY, LOWER, HandCfg, VirtualHand, add_hand_to_spec  # noqa: E402
+from mjlab_openchicken.pickup.model import WINDOW, PauseStateMachine, StateMachineCfg  # noqa: E402
 
-SCENE = "src/mjlab_microduck/robot/microduck/scene_allcollisions.xml"
+SCENE = "src/mjlab_openchicken/robot/openchicken/scenes/scene_allcollisions.xml"
 POLICY = "logs/bench_onnx/velstand_fhathosb_3750.onnx"
 DT, DECIM = 0.005, 4
 CTRL_DT = DT * DECIM

@@ -6,7 +6,7 @@ l'entraînement via le check_nan global de rsl_rl.
 
 import torch
 
-from mjlab_microduck.tasks.mdp import robot_state_is_nan
+from mjlab_openchicken.tasks.mdp import robot_state_is_nan
 
 
 class _Data:

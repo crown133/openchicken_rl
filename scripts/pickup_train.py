@@ -16,8 +16,8 @@ import numpy as np
 import torch
 import torch.nn.functional as Fn
 
-from mjlab_microduck.pickup.features import CURRENT_SLICE, FEAT_DIM, PAUSED_IDX
-from mjlab_microduck.pickup.model import WINDOW, PickupNet, StateMachineCfg, export_onnx
+from mjlab_openchicken.pickup.features import CURRENT_SLICE, FEAT_DIM, PAUSED_IDX
+from mjlab_openchicken.pickup.model import WINDOW, PickupNet, StateMachineCfg, export_onnx
 
 
 def load(paths, dev):

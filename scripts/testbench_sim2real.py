@@ -28,7 +28,7 @@ from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
-from mjlab_microduck.robot.testbench_constants import (
+from mjlab_openchicken.robot.testbench_constants import (
     TESTBENCH_ARM_MASS,
     TESTBENCH_XML,
     _set_arm_mass,
@@ -114,7 +114,7 @@ def rollout_sim_bam(onnx_path: str, total_time: float, seed: int, action_scale: 
     from bam.mujoco import MujocoController
 
     # Load the fitted XL330 m6 params from the canonical bam bundle (identical to
-    # the values that used to live in mjlab_microduck.actuator.bam_params).
+    # the values that used to live in mjlab_openchicken.actuator.bam_params).
     import json as _json
     from bam.model import _resolve_json_path
     with open(_resolve_json_path(None, "xl330", "m6")) as _f:
@@ -223,7 +223,7 @@ def rollout_sim_mjlab(onnx_path: str, total_time: float, seed: int, action_scale
 
     from mjlab.envs import ManagerBasedRlEnv
 
-    from mjlab_microduck.tasks.testbench_env_cfg import make_testbench_env_cfg
+    from mjlab_openchicken.tasks.testbench_env_cfg import make_testbench_env_cfg
 
     env_cfg = make_testbench_env_cfg(play=True)
     env_cfg.scene.num_envs = 1
