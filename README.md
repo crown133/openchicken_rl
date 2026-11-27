@@ -1,6 +1,6 @@
 # OpenChicken RL
 
-Based on [Pollen Robotics Microduck RL](https://github.com/pollen-robotics/microduck_rl) at `bae39f5900b318f7e87fc485c30a31213cfa14eb`. This fork retains the native tasks and adds SuperMimic-style motion tracking for OpenChicken. See [UPSTREAM_SOURCE.json](UPSTREAM_SOURCE.json) for provenance.
+Based on [Pollen Robotics Microduck RL](https://github.com/pollen-robotics/microduck_rl). This fork retains the native tasks and adds SuperMimic-style motion tracking for OpenChicken. See [UPSTREAM_SOURCE.json](UPSTREAM_SOURCE.json) for provenance.
 
 <table>
   <tr>
@@ -21,8 +21,7 @@ robot by the runtime in [pollen-robotics/microduck](https://github.com/pollen-ro
 
 The repo encodes the full sim2real recipe: [BAM](https://github.com/Rhoban/bam)
 actuator physics, domain randomization, backlash simulation, and the
-reward-design lessons that made it work
-(see [AGENTS.md](AGENTS.md) for the distilled playbook).
+reward-design lessons that made it work.
 
 ## Quickstart
 
@@ -352,10 +351,6 @@ Conventions worth knowing:
 - The exporter bakes the observation normalizer into the ONNX graph — always
   deploy ONNX produced by `scripts/export.py`, never a hand-converted
   checkpoint, or the policy sees unnormalized observations at runtime.
-
-[AGENTS.md](AGENTS.md) documents the env-building workflow and the reward-design
-rules learned across the project (also aimed at AI coding agents working in
-this repo).
 
 ## Publishing a policy
 
