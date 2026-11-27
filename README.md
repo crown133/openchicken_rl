@@ -4,27 +4,22 @@ Based on [Pollen Robotics Microduck RL](https://github.com/pollen-robotics/micro
 
 <table width="100%">
   <tr>
-    <td align="center" valign="middle" width="50%">
-      <a href="assets/hardware/openchicken.png"><img src="assets/hardware/openchicken.png" alt="OpenChicken robot with its red comb and sunglasses" width="320" /></a>
+    <td align="center" valign="middle" width="33%">
+      <a href="assets/hardware/openchicken.png"><img src="assets/hardware/openchicken.png" alt="OpenChicken robot with its red comb and sunglasses" width="240" /></a>
     </td>
-    <td align="center" valign="middle" width="50%">
-      <a href="assets/hardware/openikun.jpg"><img src="assets/hardware/openikun.jpg" alt="Openikun robot with silver hair and sunglasses" width="320" /></a>
+    <td align="center" valign="middle" width="33%">
+      <a href="assets/hardware/openikun.jpg"><img src="assets/hardware/openikun.jpg" alt="Openikun robot with silver hair and sunglasses" width="240" /></a>
+    </td>
+    <td align="center" valign="middle" width="33%">
+      <a href="assets/hardware/openchicken-motion.gif"><img src="assets/hardware/openchicken-motion.gif" alt="OpenChicken moving its head during a hardware demonstration" width="240" /></a>
     </td>
   </tr>
   <tr>
     <td align="center"><strong>OpenChicken</strong></td>
     <td align="center"><strong>Openikun</strong></td>
+    <td align="center"><strong>In motion</strong></td>
   </tr>
 </table>
-
-<details>
-  <summary>Watch OpenChicken in motion · 8.2 s</summary>
-  <p align="center">
-    <a href="assets/hardware/openchicken-demo.mp4"><img src="assets/hardware/openchicken-demo.gif" alt="OpenChicken hardware video preview" width="480" /></a>
-    <br />
-    <a href="assets/hardware/openchicken-demo.mp4">Watch the original video</a>
-  </p>
-</details>
 
 RL training environments for OpenChicken —
 a ~800 g, ~25 cm tall bipedal robot — built on
