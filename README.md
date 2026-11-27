@@ -2,16 +2,29 @@
 
 Based on [Pollen Robotics Microduck RL](https://github.com/pollen-robotics/microduck_rl). This fork retains the native tasks and adds SuperMimic-style motion tracking for OpenChicken. See [UPSTREAM_SOURCE.json](UPSTREAM_SOURCE.json) for provenance.
 
-<table>
+<table width="100%">
   <tr>
-    <td align="center" width="50%"><img height="270" alt="OpenChicken robot" src="assets/hardware/openchicken.jpg" /></td>
-    <td align="center" width="50%"><a href="assets/hardware/openchicken-demo.mp4"><img height="270" alt="OpenChicken hardware video preview" src="assets/hardware/openchicken-demo.gif" /></a></td>
+    <td align="center" valign="middle" width="50%">
+      <a href="assets/hardware/openchicken.png"><img src="assets/hardware/openchicken.png" alt="OpenChicken robot with its red comb and sunglasses" width="320" /></a>
+    </td>
+    <td align="center" valign="middle" width="50%">
+      <a href="assets/hardware/openikun.jpg"><img src="assets/hardware/openikun.jpg" alt="Openikun robot with silver hair and sunglasses" width="320" /></a>
+    </td>
   </tr>
   <tr>
-    <td align="center">OpenChicken</td>
-    <td align="center"><a href="assets/hardware/openchicken-demo.mp4">Watch the original video (8.2 s)</a></td>
+    <td align="center"><strong>OpenChicken</strong></td>
+    <td align="center"><strong>Openikun</strong></td>
   </tr>
 </table>
+
+<details>
+  <summary>Watch OpenChicken in motion · 8.2 s</summary>
+  <p align="center">
+    <a href="assets/hardware/openchicken-demo.mp4"><img src="assets/hardware/openchicken-demo.gif" alt="OpenChicken hardware video preview" width="480" /></a>
+    <br />
+    <a href="assets/hardware/openchicken-demo.mp4">Watch the original video</a>
+  </p>
+</details>
 
 RL training environments for OpenChicken —
 a ~800 g, ~25 cm tall bipedal robot — built on
