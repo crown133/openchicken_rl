@@ -125,10 +125,7 @@ See `src/mjlab_openchicken/tasks/backlash.py`.
 
 ## SuperMimic / Supertracking
 
-The final 30,000-iteration checkpoint from the local 4,096-environment run is
-available as an [export bundle with CPU export instructions](checkpoints/supertracking_v12_30000/README.md).
-It includes the complete Replay cache, all trained modules and normalizers,
-optimizer and RNG state, stored as lossless Git LFS parts.
+Training checkpoints are kept outside version control.
 
 Our motion-tracking task adapts the learned-world-model approach using
 [Breezewrf's mjlab reproduction](https://github.com/Breezewrf/supermimic_mjlab/tree/a7cee74636a4c596cd8710f8c2e51f82d78bb150)
